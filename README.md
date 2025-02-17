@@ -8,7 +8,7 @@ Group project for the software engineering class of Spring 2024.
 | Lauren Cassels  | lcassels20 |
 | Christian Conway | Christian-Conway |
 | Ashton Davis | AshtonDavis2003 |
-| McKayla Lemon |         |
+| McKayla Lemon |   McKaylaLemon  |
 
 
 ## Installation Requirements
