@@ -18,6 +18,8 @@ Group project for the software engineering class of Spring 2024.
 - tkinter 8.6
 - psycopg2
 - psycopg2.sql
+- pygame_gui
+- pygame
 
 ## Running the Project
 1. **Clone the repository**:
