@@ -40,4 +40,6 @@ Group project for the software engineering class of Spring 2024.
    ```sh
    python3 playerScreen.py
    ```
+   To create a player:
+   Type a code name in the grey space provided, click which team and which ID you would like to use, press enter on your keyboard to finalize your player.
    
