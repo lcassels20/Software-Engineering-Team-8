@@ -2,12 +2,13 @@
 Group project for the software engineering class of Spring 2024.
 
 ## Members:
-Real Names	Github Names
-Mylia Rosen	mcr61
-Lauren Cassels	lcassels20
-Christian Conway	
-Ashton Davis	AshtonDavis2003
-McKayla Lemon 
+| Real Names | Github Usernames|
+| ------------- | ------------- |
+| Mylia Rosen  | mcr61  |
+| Lauren Cassels  | lcassels20 |
+| Christian Conway |     |
+| Ashton Davis | AshtonDavis2003 |
+| McKayla Lemon |         |
 
 
 ## Installation Requirements
