@@ -13,7 +13,7 @@ Group project for the software engineering class of Spring 2024.
 
 ## Installation Requirements
 - Python 3.12+ installed on your machine
-- Ensure all the scripts/files (`main.py`, `udpSocket.py`, `udpServer.py`, `udpClient.py`, 'database.py' 'logo.jpg' ) are in the same directory
+- Ensure all the scripts/files (`main.py`, `udpSocket.py`, `udpServer.py`, `udpClient.py`, `database.py` 'logo.jpg' ) are in the same directory
 - git
 - tkinter 8.6
 - psycopg2
