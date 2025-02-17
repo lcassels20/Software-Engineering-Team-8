@@ -31,7 +31,7 @@ Group project for the software engineering class of Spring 2024.
     python3 trafficGenerator.py
     ```
 4. **Run the database script**:
-   '''sh
+   ```sh
    python3 database.py
-   '''
+   ```
    
