@@ -14,6 +14,7 @@ McKayla Lemon
 - Python 3.12+ installed on your machine
 - Ensure all the scripts/files (`main.py`, `udpSocket.py`, `udpServer.py`, `udpClient.py`, 'logo.jpg' ) are in the same directory
 - git
+- tkinter 8.6
 
 ## Running the Project
 1. **Clone the repository**:
