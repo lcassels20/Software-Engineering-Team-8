@@ -1,4 +1,4 @@
-# Software-Engineering-Team-8-EDITING-IN-PROGRESS
+# Software-Engineering-Team-8-
 Group project for the software engineering class of Spring 2024.
 
 ## Members:
@@ -22,4 +22,8 @@ McKayla Lemon
 2. **Run the main script**:
     ```sh
     python3 main.py
+    ```
+3. **Run the trafficGenerator script**:
+    ```sh
+    python3 trafficGenerator.py
     ```
