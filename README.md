@@ -23,13 +23,15 @@ Group project for the software engineering class of Spring 2024.
   ```sh
   pip install psycopg2
   ```
-- psycopg2.sql
-```sh
-pip install pygame_gui
-```
-```sh
-pip install pygame
-```
+  ```sh
+  pip install psycopg2-binary
+  ```
+  ```sh
+  pip install pygame_gui
+  ```
+  ```sh
+  pip install pygame
+  ```
 
 ## Running the Project
 1. **Clone the repository**:
@@ -37,15 +39,15 @@ pip install pygame
    git clone git@github.com:lcassels20/Software-Engineering-Team-8.git```
     ```
 2. **After Forking the repository, start a virtual environment**:
-  ```sh
-  sudo apt-get install python3-venve
-  ```
-  ```sh
-  python3 -m venv photon
-  ```
-  ```sh
-  . ./photon/bin/activate
-  ```
+   ```sh
+   sudo apt-get install python3-venve
+   ```
+   ```sh
+   python3 -m venv photon
+   ```
+   ```sh
+   . ./photon/bin/activate
+   ```
 3. **Run the main script**:
     ```sh
     python3 main.py
