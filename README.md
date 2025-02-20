@@ -20,7 +20,23 @@ Group project for the software engineering class of Spring 2024.
   ```sh
   sudo apt-get install python3-tk
   ```
-- After Forking the repository, start a virtual environment
+  ```sh
+  pip install psycopg2
+  ```
+- psycopg2.sql
+```sh
+pip install pygame_gui
+```
+```sh
+pip install pygame
+```
+
+## Running the Project
+1. **Clone the repository**:
+    ```sh
+   git clone git@github.com:lcassels20/Software-Engineering-Team-8.git```
+    ```
+2. **After Forking the repository, start a virtual environment**:
   ```sh
   sudo apt-get install python3-venve
   ```
@@ -30,28 +46,19 @@ Group project for the software engineering class of Spring 2024.
   ```sh
   . ./photon/bin/activate
   ```
-  
-- psycopg2
-- psycopg2.sql
-- pygame_gui
-- pygame
-
-## Running the Project
-1. **Clone the repository**:
-    ```git clone git@github.com:lcassels20/Software-Engineering-Team-8.git```
-2. **Run the main script**:
+3. **Run the main script**:
     ```sh
     python3 main.py
     ```
-3. **Run the trafficGenerator script**:
+4. **Run the trafficGenerator script**:
     ```sh
     python3 trafficGenerator.py
     ```
-4. **Run the database script**:
+5. **Run the database script**:
    ```sh
    python3 database.py
    ```
-5. **Run the playerScreen script**:
+6. **Run the playerScreen script**:
    ```sh
    python3 playerScreen.py
    ```
