@@ -20,6 +20,17 @@ Group project for the software engineering class of Spring 2024.
   ```sh
   sudo apt-get install python3-tk
   ```
+- After Forking the repository, start a virtual environment
+  ```sh
+  sudo apt-get install python3-venve
+  ```
+  ```sh
+  python3 -m venv photon
+  ```
+  ```sh
+  . ./photon/bin/activate
+  ```
+  
 - psycopg2
 - psycopg2.sql
 - pygame_gui
