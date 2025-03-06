@@ -1,4 +1,4 @@
-# Software-Engineering-Team-8-
+# Software-Engineering-Team-8
 Group project for the software engineering class of Spring 2024.
 
 ## Members:
