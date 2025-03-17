@@ -1,5 +1,6 @@
 # Software-Engineering-Team-8
-Group project for the software engineering class of Spring 2024.
+Group project for the software engineering class of Spring 2025.
+This guide will walk you through installing the necessary software, configuring PostgreSQL, and running the project. 
 
 ## Members:
 | Real Names | Github Usernames|
@@ -11,59 +12,90 @@ Group project for the software engineering class of Spring 2024.
 | McKayla Lemon |   McKaylaLemon  |
 
 
-## Installation Requirements
-- Python 3.12+ installed on your machine
-- Ensure all the scripts/files (`main.py`, `udpSocket.py`, `udpServer.py`, `udpClient.py`, `database.py`, `playerScreen.py`, 'logo.jpg' ) are in the same directory
-  ```sh
-  sudo apt-get install git
-  ```
-  ```sh
-  sudo apt-get install python3-tk
-  ```
-  ```sh
-  pip install psycopg2
-  ```
-  ```sh
-  pip install psycopg2-binary
-  ```
-  ```sh
-  pip install pygame_gui
-  ```
-  ```sh
-  pip install pygame
-  ```
+## Requirements
+- A Debian-based virtual machine (e.g., Ubuntu or Debian)
+- Sudo Privileges
 
-## Running the Project
-1. **Clone the repository**:
+## Installation and Setup
+1. **Install Required Software**
+  **Install Git**:
+   ```sh
+   sudo apt-get install git
+   ```
+2. **Clone the Repository**
+  **Clone and change into the Directory**:
+   ```sh
+   git clone git@github.com:lcassels20/Software-Engineering-Team-8.git
+   ```
+   ```sh
+   cd Software-Engineering-Team-8
+   ```
+3. **Install Python Tkinter (for GUI Support)**:
     ```sh
-   git clone git@github.com:lcassels20/Software-Engineering-Team-8.git```
+    sudo apt-get install python3-tk
     ```
-2. **After Forking the repository, start a virtual environment**:
-   ```sh
-   sudo apt-get install python3-venve
-   ```
-   ```sh
-   python3 -m venv photon
-   ```
-   ```sh
-   . ./photon/bin/activate
-   ```
-3. **Run the main script**:
+4. **Install pip for Python3**:
     ```sh
-    python3 main.py
+    sudo apt-get install python3-pip
     ```
-4. **Run the trafficGenerator script**:
-    ```sh
-    python3 trafficGenerator.py
-    ```
-5. **Run the database script**:
+5. **Install Python Dependencies**
+   **Install pg8000**:
    ```sh
-   python3 database.py
+   pip3 install pg8000
    ```
-6. **Run the playerScreen script**:
+   **Install Pillow**:
    ```sh
-   python3 playerScreen.py
+   python3 -m pip install Pillow
    ```
-   To create a player:
-   Type a code name in the grey space provided, click which team and which ID you would like to use, press enter on your keyboard to finalize your player.
+6. **Install PostgreSQL and Extras**:
+   ```sh
+   bash
+   ```
+   ```sh
+   Copy
+   ```
+   ```sh
+   sudo apt-get install postgresql postgresql-contrib
+   ```
+7. **Configure PostgreSQL**
+   **Change the Password for the postgres User**:
+   **Open the PostgreSQL Prompt**:
+   ```sh
+   sudo -u postgres psql
+   ```
+   **At the Postgres=# prompt, run**:
+   ```sh
+   ALTER USER postgres WITH PASSWORD 'student';
+   ```
+   **Exit the prompt**:
+   ```sh
+   \q
+   ```
+   8. **Run the Code**
+   ```sh
+   python3 main.py
+   ```
+   **If all steps are followed correctly, the application should run without PostgreSQL authentication errors.
+
+   ## Game Instructions
+   **Play the Game**: Click the play button.
+   **Add a Player**: Click Add Player on the respective team.
+   **Submit Players**: After entering players, click Submit Players for each team to send it to the player action.
+   **Start Game**: Click Start Game to begin playing.
+   **Other Options**:
+       Users can change the network or clear teams if needed.
+       Press Esc on your keyboard to exit full-screen mode.
+       Click the X in the popup window to end the game.
+       Debugging: the terminal will display all UDP transmission handling.
+
+
+
+
+
+
+
+
+
+
+   
    
