@@ -184,5 +184,5 @@ if __name__ == "__main__":
         print("Connection to PostgreSQL encountered an error.")
     
     #Uncomment one of the following lines to either clear or create the table.
-    #clear_players_table()
-    #create_players_table()
+    clear_players_table()
+    create_players_table()
