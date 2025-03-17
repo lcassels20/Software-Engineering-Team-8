@@ -49,12 +49,6 @@ This guide will walk you through installing the necessary software, configuring 
    ```
 6. **Install PostgreSQL and Extras**:
    ```sh
-   bash
-   ```
-   ```sh
-   Copy
-   ```
-   ```sh
    sudo apt-get install postgresql postgresql-contrib
    ```
 7. **Configure PostgreSQL**
