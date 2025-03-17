@@ -12,56 +12,38 @@ This guide will walk you through installing the necessary software, configuring 
 ### 1. Install Required Software
 
 **Install Git:**
-```bash
-sudo apt-get install git
+
+--sudo apt-get install git
 2. Clone the Repository
 Clone the Repository and Change into the Directory:
-
-bash
-Copy
 git clone https://github.com/AshtonDavis2003/testingg.git
 cd testingg
+
 3. Install Python Tkinter (for GUI support)
-bash
-Copy
 sudo apt-get install python3-tk
+
 4. Install pip for Python3
-bash
-Copy
 sudo apt-get install python3-pip
+
 5. Install Python Dependencies
 Install pg8000:
-
-bash
-Copy
 pip3 install pg8000
 Install Pillow:
-
-bash
-Copy
 python3 -m pip install Pillow
+
 6. Install PostgreSQL and Extras
-bash
-Copy
 sudo apt-get install postgresql postgresql-contrib
+
 7. Configure PostgreSQL
 Change the Password for the postgres User:
-
 Open the PostgreSQL prompt:
-bash
-Copy
 sudo -u postgres psql
 At the postgres=# prompt, run:
-sql
-Copy
 ALTER USER postgres WITH PASSWORD 'student';
 Exit the prompt:
-sql
-Copy
 \q
+
 8. Run the Code
-bash
-Copy
 python3 main.py
 If all steps are followed correctly, the application should run without PostgreSQL authentication errors.
 
