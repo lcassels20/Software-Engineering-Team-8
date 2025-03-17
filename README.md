@@ -71,11 +71,11 @@ This guide will walk you through installing the necessary software, configuring 
    ```sh
    \q
    ```
-   8. **Run the Code**
+8. **Run the Code**
    ```sh
    python3 main.py
    ```
-   **If all steps are followed correctly, the application should run without PostgreSQL authentication errors.
+   **If all steps are followed correctly, the application should run without PostgreSQL authentication errors.**
 
    ## Game Instructions
    **Play the Game**: Click the play button.
