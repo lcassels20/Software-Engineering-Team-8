@@ -175,6 +175,6 @@ def update_equipment_id(player_id, equipment_id):
 
 if __name__ == "__main__":
     # First, drop the old table (wiping out old data)
-    clear_players_table()
+    #clear_players_table()
     # Then, re-create the table with the updated schema.
     create_players_table()
