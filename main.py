@@ -10,7 +10,7 @@ import udpClient      # provides run_client()
 
 def main():
     # Drop the old players table to avoid schema conflicts.
-    database.clear_players_table()
+    #database.clear_players_table()
     # Create a fresh table with the updated schema.
     database.create_players_table()
     
