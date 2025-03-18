@@ -32,11 +32,12 @@ def create_players_table():
     """
     cursor.execute(create_query)
     
-    # Alter the table to add the 'team' column if it does not exist.
+    # Alter the table to add missing columns if they don't exist.
     try:
         cursor.execute("ALTER TABLE players ADD COLUMN IF NOT EXISTS team VARCHAR(50);")
+        cursor.execute("ALTER TABLE players ADD COLUMN IF NOT EXISTS name VARCHAR(100);")
     except Exception as e:
-        print("Error altering table to add 'team' column:", e)
+        print("Error altering table to add missing columns:", e)
     
     conn.commit()
     cursor.close()
@@ -183,6 +184,6 @@ if __name__ == "__main__":
     else:
         print("Connection to PostgreSQL encountered an error.")
     
-    #Uncomment one of the following lines to either clear or create the table.
+    # Uncomment one of the following lines to either clear or create the table.
     #clear_players_table()
     #create_players_table()
