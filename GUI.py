@@ -439,7 +439,7 @@ def teamRegistration():
     clear_all_button = tk.Button(
         redFrame,
         image=clear_all_img,
-        command=lambda: clear_all_entries(red_player_container, None),
+        command=lambda: clear_all_entries(red_player_container, green_player_container),
         borderwidth=0,
         highlightthickness=0,
         relief=tk.FLAT,
