@@ -41,7 +41,7 @@ def create_players_table():
         return
     cursor = conn.cursor()
     create_query = """
-    CREATE TABLE players (
+    CREATE TABLE IF NOT EXISTS players (
         id SERIAL PRIMARY KEY,
         player_id VARCHAR(50) UNIQUE,
         name VARCHAR(100),
