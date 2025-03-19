@@ -23,7 +23,7 @@ This guide will walk you through installing the necessary software, configuring 
    sudo apt-get install git
    ```
 2. **Clone the Repository**
-  **Clone and change into the Directory**:
+  **(Clone and change into the Directory)**:
    ```sh
    git clone git@github.com:lcassels20/Software-Engineering-Team-8.git
    ```
@@ -39,11 +39,11 @@ This guide will walk you through installing the necessary software, configuring 
     sudo apt-get install python3-pip
     ```
 5. **Install Python Dependencies**
-   **Install pg8000**:
+   **(Install pg8000)**:
    ```sh
    pip3 install pg8000
    ```
-   **Install Pillow**:
+   **(Install Pillow)**:
    ```sh
    python3 -m pip install Pillow
    ```
@@ -52,8 +52,8 @@ This guide will walk you through installing the necessary software, configuring 
    sudo apt-get install postgresql postgresql-contrib
    ```
 7. **Configure PostgreSQL**
-   **Change the Password for the postgres User**:
-   **Open the PostgreSQL Prompt**:
+   **(Change the Password for the postgres Use)**:
+   **(Open the PostgreSQL Prompt)**:
    ```sh
    sudo -u postgres psql
    ```
@@ -66,7 +66,7 @@ This guide will walk you through installing the necessary software, configuring 
    \q
    ```
 8. **Run the Code**
-   **First run database.py before running the main file to clear the table**
+   **(First run database.py before running the main file to clear the table)**
    ```sh
    python3 database.py
    ```
