@@ -66,6 +66,10 @@ This guide will walk you through installing the necessary software, configuring 
    \q
    ```
 8. **Run the Code**
+   **First run database.py before running the main file to clear the table**
+   ```sh
+   python3 database.py
+   ```
    ```sh
    python3 main.py
    ```
