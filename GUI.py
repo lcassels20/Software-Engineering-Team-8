@@ -220,7 +220,7 @@ def show_network_selection():
 
 def countdown_screen(callback):
     """
-    Displays a full-window countdown (3, 2, 1, "Game Starting") on a solid yellow background.
+    Displays a full-window countdown (30 to 1, "Game Starting") on a solid yellow background.
     The background color (#FFFF33) matches your border color. The network logo appears at the top,
     and the countdown (in Arial) is positioned towards the bottom.
     """
@@ -250,7 +250,7 @@ def countdown_screen(callback):
             countdown_label.config(text="Game Starting")
             countdown_frame.after(500, lambda: [countdown_frame.destroy(), callback()])
     
-    update_count(3)
+    update_count(30)
 
 def popup_add_player(team, container):
     popup = tk.Toplevel(app_root)
