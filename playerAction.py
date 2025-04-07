@@ -123,7 +123,7 @@ def start_game(root, players=None):
     # Initially output "Game is starting" for 2 seconds, then start countdown.
     timer_label.config(text="Game is starting")
     print("Game is starting")
-    root.after(2000, lambda: update_timer(300))
+    root.after(2000, lambda: update_timer(360)) #Needs to be 360 seconds to run for 6 minutes
 
 # For testing purposes
 if __name__ == "__main__":
