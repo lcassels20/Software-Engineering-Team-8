@@ -107,6 +107,21 @@ def start_game(root, players=None):
     timer_label = tk.Label(bottom_frame, text="", font=("Arial", 24), fg="black", bg="#AB7E02")
     timer_label.pack(pady=10)
     
+    # Handle base hits 
+    def handle_code(code, player_id):
+        nonlocal scores
+        if code == "53":  # Green scores on Red base
+            scores["Green"] += 100
+            green_score_label.config(text=f"Score: {scores['Green']}")
+            player_codenames[player_id] = f"B {player_codenames[player_id]}"
+            green_player_labels[player_id].config(text=f"ID: {player_id} | Name: {player_codenames[player_id]} | Equipment: {player[2]}")
+        elif code == "43":  # Red scores on Green base
+            scores["Red"] += 100
+            red_score_label.config(text=f"Score: {scores['Red']}")
+            player_codenames[player_id] = f"B {player_codenames[player_id]}"
+            red_player_labels[player_id].config(text=f"ID: {player_id} | Name: {player_codenames[player_id]} | Equipment: {player[2]}")
+    
+    
     # Timer countdown function.
     def update_timer(seconds):
         if seconds > 0:
