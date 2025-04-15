@@ -15,13 +15,13 @@ tracks = [
     "Track8.mp3"
 ]
 
-# Randomly select one track
-selected_track = random.choice(tracks)
-print(f"Now playing: {selected_track}")
-
-# Load and play the audio
-audio = AudioSegment.from_file(selected_track)
-play_obj = _play_with_simpleaudio(audio)
-
-# Wait until playback is finished
-play_obj.wait_done()
+def play:
+    selected_track = random.choice(tracks)
+    print(f"Now playing: {selected_track}")
+    
+    # Load and play the audio
+    audio = AudioSegment.from_file(selected_track)
+    play_obj = _play_with_simpleaudio(audio)
+    
+    # Wait until playback is finished
+    play_obj.wait_done()
