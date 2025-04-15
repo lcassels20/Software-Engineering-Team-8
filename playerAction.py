@@ -113,7 +113,6 @@ def start_game(root, players=None):
     timer_label = tk.Label(bottom_frame, text="", font=("Arial", 24), fg="black", bg="#AB7E02")
     timer_label.pack(pady=10)
 
-    # Start 6-minute game timer after 2 second delay
     def update_timer(seconds):
         if seconds > 0:
             mins, secs = divmod(seconds, 60)
@@ -125,19 +124,22 @@ def start_game(root, players=None):
             timer_label.config(text="Game Over")
             print("Game Over")
 
-    root.after(2000, lambda: update_timer(360))
+    def pre_game_countdown(seconds):
+        if seconds > 0:
+            timer_label.config(text=f"Game starting in {seconds}s...")
+            print(f"Pre-game countdown: {seconds}s")
+            root.after(1000, pre_game_countdown, seconds - 1)
+        else:
+            signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            signal_sock.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
+            print("Sent '202' to traffic generator")
+            update_timer(360)
 
-    # Send '202' to traffic generator
-    signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    signal_sock.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
-    print("Sent '202' to traffic generator")
+    pre_game_countdown(30)
 
-    # Start server to receive traffic
     score_labels = {"Red": red_score_label, "Green": green_score_label}
     player_frames = {"Red": red_players_frame, "Green": green_players_frame}
     threading.Thread(target=udpServer.run_server, args=(score_labels, player_frames), daemon=True).start()
-
-    # Play music
     threading.Thread(target=play_random_music, daemon=True).start()
 
 def handle_score_event(player_id, team, score_label, players_frame):
