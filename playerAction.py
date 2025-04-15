@@ -178,8 +178,8 @@ def handle_score_event(player_id, team, score_label, players_frame):
         target=udpServer.run_server,
         args=(score_labels, player_frames),
         daemon=True
+    ).start()
 
-    
 
 # For testing purposes
 if __name__ == "__main__":
