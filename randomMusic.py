@@ -15,7 +15,7 @@ tracks = [
     "Track8.mp3"
 ]
 
-def play:
+def play():
     selected_track = random.choice(tracks)
     print(f"Now playing: {selected_track}")
     
