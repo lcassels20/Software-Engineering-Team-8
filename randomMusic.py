@@ -15,6 +15,9 @@ tracks = [
     "Track8.mp3"
 ]
 
+def randomMusic(__init__):
+    return
+    
 def play():
     selected_track = random.choice(tracks)
     print(f"Now playing: {selected_track}")
