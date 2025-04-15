@@ -140,6 +140,11 @@ def start_game(root, players=None):
     print("Game is starting")
     root.after(2000, lambda: update_timer(360)) #Needs to be 360 seconds to run for 6 minutes
 
+    # Play one of the 8 music tracks at random each game.
+    music = randomMusic()
+    music.play()
+    
+
 # For testing purposes
 if __name__ == "__main__":
     root = tk.Tk()
