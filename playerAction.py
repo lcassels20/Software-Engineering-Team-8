@@ -161,6 +161,25 @@ def handle_score_event(player_id, team, score_label, players_frame):
     music = randomMusic()
     music.play()
     
+    # ========== UDP/TRAFFIC GENERATOR INTEGRATION ==========
+    # Send the '202' signal to the traffic generator to begin sending messages
+    import socket
+    import config
+    signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    signal_sock.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
+    print("Sent '202' to traffic generator")
+
+    # Start the UDP server in the background to listen for events from the generator
+    import udpServer
+    import threading
+    score_labels = {"Red": red_score_label, "Green": green_score_label}
+    player_frames = {"Red": red_players_frame, "Green": green_players_frame}
+    threading.Thread(
+        target=udpServer.run_server,
+        args=(score_labels, player_frames),
+        daemon=True
+
+    
 
 # For testing purposes
 if __name__ == "__main__":
