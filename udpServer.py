@@ -1,8 +1,8 @@
 import socket
 import config
-from playerAction import handle_score_event, player_scores
 
 def run_server(score_labels=None, player_frames=None):
+    from playerAction import handle_score_event, player_scores
     localIP = config.NETWORK_ADDRESS
     localPort = 7501  # Receiving port
     bufferSize = 1024
