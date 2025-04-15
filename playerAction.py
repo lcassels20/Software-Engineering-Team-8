@@ -29,6 +29,8 @@ def create_scrollable_frame(parent, height):
     return scroll_frame
 
 def start_game(root, players=None):
+    global player_scores
+
     # Clear all widgets from the current window.
     for widget in root.winfo_children():
         widget.destroy()
@@ -108,18 +110,33 @@ def start_game(root, players=None):
     timer_label.pack(pady=10)
     
     # Handle base hits 
-    def handle_code(code, player_id):
-        nonlocal scores
-        if code == "53":  # Green scores on Red base
-            scores["Green"] += 100
-            green_score_label.config(text=f"Score: {scores['Green']}")
-            player_codenames[player_id] = f"B {player_codenames[player_id]}"
-            green_player_labels[player_id].config(text=f"ID: {player_id} | Name: {player_codenames[player_id]} | Equipment: {player[2]}")
-        elif code == "43":  # Red scores on Green base
-            scores["Red"] += 100
-            red_score_label.config(text=f"Score: {scores['Red']}")
-            player_codenames[player_id] = f"B {player_codenames[player_id]}"
-            red_player_labels[player_id].config(text=f"ID: {player_id} | Name: {player_codenames[player_id]} | Equipment: {player[2]}")
+  def handle_score_event(player_id, team, score_label, players_frame):
+    """
+    Handles scoring events by updating the player's score and codename.
+    """
+    if player_id not in player_scores:
+        print(f"Player ID {player_id} not found.")
+        return
+
+    # Update the player's score
+    player_scores[player_id]["score"] += 100
+
+    # Add a stylized "B" to the codename if not already present
+    if not player_scores[player_id]["codename"].startswith("B "):
+        player_scores[player_id]["codename"] = f"B {player_scores[player_id]['codename']}"
+
+    # Update the score label
+    total_score = sum(player["score"] for player in player_scores.values() if player["team"] == team)
+    score_label.config(text=f"Score: {total_score}")
+
+    # Update the player list in the UI
+    for widget in players_frame.winfo_children():
+        widget.destroy()
+    for player_id, player_data in player_scores.items():
+        if player_data["team"] == team:
+            text = f"ID: {player_id} | Name: {player_data['codename']} | Score: {player_data['score']}"
+            label = tk.Label(players_frame, text=text, bg=players_frame["bg"], fg="#FFFF33", font=("Arial", 12))
+            label.pack(anchor="w", pady=2)
     
     
     # Timer countdown function.
