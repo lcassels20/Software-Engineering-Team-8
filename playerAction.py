@@ -2,8 +2,8 @@ import tkinter as tk
 from database import get_connection
 import socket
 import config
-import udpServer
 import threading
+import udpServer
 from randomMusic import play as play_random_music
 
 player_scores = {}
@@ -124,19 +124,14 @@ def start_game(root, players=None):
             timer_label.config(text="Game Over")
             print("Game Over")
 
-    def pre_game_countdown(seconds):
-        if seconds > 0:
-            timer_label.config(text=f"Game starting in {seconds}s...")
-            print(f"Pre-game countdown: {seconds}s")
-            root.after(1000, pre_game_countdown, seconds - 1)
-        else:
-            signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            signal_sock.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
-            print("Sent '202' to traffic generator")
-            update_timer(360)
+    # Send '202' to traffic generator immediately
+    signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    signal_sock.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
+    print("Sent '202' to traffic generator")
 
-    pre_game_countdown(30)
+    update_timer(360)  # Start 6-minute game timer immediately
 
+    # Start background server and music
     score_labels = {"Red": red_score_label, "Green": green_score_label}
     player_frames = {"Red": red_players_frame, "Green": green_players_frame}
     threading.Thread(target=udpServer.run_server, args=(score_labels, player_frames), daemon=True).start()
@@ -146,6 +141,7 @@ def handle_score_event(player_id, team, score_label, players_frame):
     if player_id not in player_scores:
         print(f"Player ID {player_id} not found.")
         return
+
     player_scores[player_id]["score"] += 100
     if not player_scores[player_id]["codename"].startswith("B "):
         player_scores[player_id]["codename"] = f"B {player_scores[player_id]['codename']}"
