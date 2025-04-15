@@ -110,7 +110,7 @@ def start_game(root, players=None):
     timer_label.pack(pady=10)
     
     # Handle base hits 
-  def handle_score_event(player_id, team, score_label, players_frame):
+def handle_score_event(player_id, team, score_label, players_frame):
     """
     Handles scoring events by updating the player's score and codename.
     """
