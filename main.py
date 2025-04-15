@@ -27,19 +27,14 @@ def main():
         root.destroy()
     root.protocol("WM_DELETE_WINDOW", on_closing)
 
-    GUI.display_splash_screen(root, lambda: GUI.start_registration())
+    def after_splash():
+        # Start background socket broadcasts and client after splash screen is gone
+        threading.Thread(target=udpSocket.transmit_equipment_code, args=("EQ12345",), daemon=True).start()
+        threading.Thread(target=udpClient.run_client, daemon=True).start()
+        GUI.start_registration()
 
-    # You no longer start udpServer.run_server here
-    # Instead it's called inside playerAction.py after GUI is built
+    GUI.display_splash_screen(root, after_splash)
 
-    socket_thread = threading.Thread(target=udpSocket.transmit_equipment_code, args=("EQ12345",), daemon=True)
-    socket_thread.start()
-
-    udpClient.run_client()
-
-    socket_thread.join(timeout=1)
-
-    print("[Main] All tests completed.")
     root.mainloop()
 
 if __name__ == "__main__":
