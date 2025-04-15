@@ -41,3 +41,6 @@ def run_server(score_labels=None, player_frames=None):
         reply = "OK" if message.strip() != "221" else "221"
         UDPServerSocket.sendto(reply.encode(), address)
 
+if __name__ == "__main__":
+    run_server()
+
