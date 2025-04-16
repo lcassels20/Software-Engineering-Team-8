@@ -1,7 +1,12 @@
 import tkinter as tk
 from database import get_connection
+import socket
+import config
+import threading
+import udpServer
+from randomMusic import play as play_random_music
 
-player_scores = {}  # Tracks player scores and codenames
+player_scores = {}
 
 def fetch_players():
     conn = get_connection()
@@ -14,37 +19,129 @@ def fetch_players():
     conn.close()
     return players
 
+def create_scrollable_frame(parent, height):
+    canvas = tk.Canvas(parent, bg=parent["bg"], highlightthickness=0, height=height)
+    scrollbar = tk.Scrollbar(parent, orient="vertical", command=canvas.yview)
+    scroll_frame = tk.Frame(canvas, bg=parent["bg"])
+    scroll_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+    canvas.create_window((0, 0), window=scroll_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+    canvas.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+    return scroll_frame
+
+def start_game(root, players=None):
+    global player_scores
+
+    for widget in root.winfo_children():
+        widget.destroy()
+
+    if players is None:
+        players = fetch_players()
+
+    player_scores = {}
+    for player in players:
+        try:
+            equipment_id = int(player[2])
+            player_scores[equipment_id] = {
+                "codename": player[1],
+                "score": 0,
+                "team": player[3]
+            }
+        except:
+            continue
+
+    red_team = [player for player in players if player[3] == "Red"]
+    green_team = [player for player in players if player[3] == "Green"]
+
+    root.grid_rowconfigure(0, weight=1)
+    root.grid_rowconfigure(1, weight=0)
+    root.grid_columnconfigure(0, weight=1)
+    root.grid_columnconfigure(1, weight=1)
+
+    red_frame = tk.Frame(root, bg="#592020", highlightthickness=2, highlightbackground="#FFFF33")
+    red_frame.grid(row=0, column=0, sticky="nsew")
+    green_frame = tk.Frame(root, bg="#20592e", highlightthickness=2, highlightbackground="#FFFF33")
+    green_frame.grid(row=0, column=1, sticky="nsew")
+
+    red_score_label = tk.Label(red_frame, text="Score: 0", bg="#592020", fg="#FFFF33", font=("Arial", 16))
+    red_score_label.pack(pady=5)
+
+    red_logo = tk.PhotoImage(file="redTeam.png")
+    red_title = tk.Label(red_frame, image=red_logo, bg="#592020")
+    red_title.image = red_logo
+    red_title.pack(pady=10)
+
+    red_players_frame = create_scrollable_frame(red_frame, height=250)
+    red_players_frame.configure(bg="#592020")
+    if red_team:
+        for player in red_team:
+            text = f"ID: {player[0]} | Name: {player[1]} | Equipment: {player[2]}"
+            label = tk.Label(red_players_frame, text=text, bg="#592020", fg="#FFFF33", font=("Arial", 12))
+            label.pack(anchor="w", pady=2)
+    else:
+        tk.Label(red_players_frame, text="No players found", bg="#592020", fg="#FFFF33", font=("Arial", 12)).pack(pady=10)
+
+    tk.Label(red_frame, text="Latest Action:", bg="#592020", fg="#FFFF33", font=("Arial", 14, "bold")).pack(pady=(10,0))
+    red_latest_action = tk.Label(red_frame, text="", bg="#592020", fg="#FFFF33", font=("Arial", 12))
+    red_latest_action.pack(pady=(0,10))
+
+    green_score_label = tk.Label(green_frame, text="Score: 0", bg="#20592e", fg="#FFFF33", font=("Arial", 16))
+    green_score_label.pack(pady=5)
+
+    green_logo = tk.PhotoImage(file="greenTeam.png")
+    green_title = tk.Label(green_frame, image=green_logo, bg="#20592e")
+    green_title.image = green_logo
+    green_title.pack(pady=10)
+
+    green_players_frame = create_scrollable_frame(green_frame, height=250)
+    green_players_frame.configure(bg="#20592e")
+    if green_team:
+        for player in green_team:
+            text = f"ID: {player[0]} | Name: {player[1]} | Equipment: {player[2]}"
+            label = tk.Label(green_players_frame, text=text, bg="#20592e", fg="#FFFF33", font=("Arial", 12))
+            label.pack(anchor="w", pady=2)
+    else:
+        tk.Label(green_players_frame, text="No players found", bg="#20592e", fg="#FFFF33", font=("Arial", 12)).pack(pady=10)
+
+    tk.Label(green_frame, text="Latest Action:", bg="#20592e", fg="#FFFF33", font=("Arial", 14, "bold")).pack(pady=(10,0))
+    green_latest_action = tk.Label(green_frame, text="", bg="#20592e", fg="#FFFF33", font=("Arial", 12))
+    green_latest_action.pack(pady=(0,10))
+
+    bottom_frame = tk.Frame(root, bg="#AB7E02")
+    bottom_frame.grid(row=1, column=0, columnspan=2, sticky="ew")
+    timer_label = tk.Label(bottom_frame, text="", font=("Arial", 24), fg="black", bg="#AB7E02")
+    timer_label.pack(pady=10)
+
+    def update_timer(seconds):
+        if seconds > 0:
+            mins, secs = divmod(seconds, 60)
+            timer_label.config(text=f"{mins:02d}:{secs:02d}")
+            if seconds % 10 == 0:
+                print(f"Timer update: {mins:02d}:{secs:02d}")
+            root.after(1000, update_timer, seconds - 1)
+        else:
+            timer_label.config(text="Game Over")
+            print("Game Over")
+
+    # Send '202' to traffic generator immediately
+    signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    signal_sock.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
+    print("Sent '202' to traffic generator")
+
+    update_timer(360)  # Start 6-minute game timer immediately
+
+    # Start background server and music
+    score_labels = {"Red": red_score_label, "Green": green_score_label}
+    player_frames = {"Red": red_players_frame, "Green": green_players_frame}
+    threading.Thread(target=udpServer.run_server, args=(score_labels, player_frames), daemon=True).start()
+    threading.Thread(target=play_random_music, daemon=True).start()
+
 def handle_score_event(player_id, team, score_label, players_frame):
     if player_id not in player_scores:
         print(f"Player ID {player_id} not found.")
         return
 
-    player_scores[player_id]["score"] += 10
-
-    if player_scores[player_id]["score"] < 0:
-        player_scores[player_id]["score"] = 0
-
-    total_score = sum(player["score"] for player in player_scores.values() if player["team"] == team)
-    score_label.config(text=f"Score: {total_score}")
-
-    for widget in players_frame.winfo_children():
-        widget.destroy()
-
-    sorted_players = sorted(
-        [(pid, pdata) for pid, pdata in player_scores.items() if pdata["team"] == team],
-        key=lambda x: x[1]["score"], reverse=True)
-
-    for pid, pdata in sorted_players:
-        label = tk.Label(players_frame, text=f"ID: {pid} | Name: {pdata['codename']} | Score: {pdata['score']}",
-                         bg=players_frame["bg"], fg="#FFFF33", font=("Arial", 12))
-        label.pack(anchor="w", pady=2)
-
-def handle_base_hit(player_id, team, score_label, players_frame):
-    if player_id not in player_scores:
-        print(f"Base hit ignored — player {player_id} not found.")
-        return
-
-    # Award 100 points and tag with "B " if not already
     player_scores[player_id]["score"] += 100
     if not player_scores[player_id]["codename"].startswith("B "):
         player_scores[player_id]["codename"] = f"B {player_scores[player_id]['codename']}"
@@ -54,103 +151,20 @@ def handle_base_hit(player_id, team, score_label, players_frame):
 
     for widget in players_frame.winfo_children():
         widget.destroy()
+    for player_id, player_data in player_scores.items():
+        if player_data["team"] == team:
+            text = f"ID: {player_id} | Name: {player_data['codename']} | Score: {player_data['score']}"
+            label = tk.Label(players_frame, text=text, bg=players_frame["bg"], fg="#FFFF33", font=("Arial", 12))
+            label.pack(anchor="w", pady=2)
 
-    sorted_players = sorted(
-        [(pid, pdata) for pid, pdata in player_scores.items() if pdata["team"] == team],
-        key=lambda x: x[1]["score"], reverse=True)
-
-    for pid, pdata in sorted_players:
-        label = tk.Label(players_frame, text=f"ID: {pid} | Name: {pdata['codename']} | Score: {pdata['score']}",
-                         bg=players_frame["bg"], fg="#FFFF33", font=("Arial", 12))
-        label.pack(anchor="w", pady=2)
-
-def launch_game_screen():
-    import tkinter as tk
-    import threading
-    import GUI
-    import randomMusic
-
-    root = tk.Toplevel()
-    root.title("Photon Gameplay")
-    root.geometry("1000x600")
-    root.configure(bg="black")
-
-    frame = tk.Frame(root, bg="black")
-    frame.pack(fill="both", expand=True)
-
-    score_labels = {"Red": None, "Green": None}
-    player_frames = {"Red": None, "Green": None}
-
-    # RED TEAM FRAME
-    red_frame = tk.Frame(frame, bg="darkred")
-    red_frame.pack(side="left", fill="both", expand=True)
-
-    tk.Label(red_frame, text="RED TEAM", bg="darkred", fg="white", font=("Arial", 18)).pack(pady=10)
-    score_labels["Red"] = tk.Label(red_frame, text="Score: 0", bg="darkred", fg="yellow", font=("Arial", 16))
-    score_labels["Red"].pack(pady=5)
-    player_frames["Red"] = tk.Frame(red_frame, bg="darkred")
-    player_frames["Red"].pack(pady=10)
-
-    # GREEN TEAM FRAME
-    green_frame = tk.Frame(frame, bg="darkgreen")
-    green_frame.pack(side="right", fill="both", expand=True)
-
-    tk.Label(green_frame, text="GREEN TEAM", bg="darkgreen", fg="white", font=("Arial", 18)).pack(pady=10)
-    score_labels["Green"] = tk.Label(green_frame, text="Score: 0", bg="darkgreen", fg="yellow", font=("Arial", 16))
-    score_labels["Green"].pack(pady=5)
-    player_frames["Green"] = tk.Frame(green_frame, bg="darkgreen")
-    player_frames["Green"].pack(pady=10)
-
-    # CENTER PLAY-BY-PLAY + RETURN BUTTON
-    center_frame = tk.Frame(frame, bg="black")
-    center_frame.pack(side="left", fill="both", expand=True)
-
-    log_label = tk.Label(center_frame, text="Play-by-Play", bg="black", fg="white", font=("Arial", 16))
-    log_label.pack()
-
-    log_box = tk.Text(center_frame, bg="black", fg="#00FF00", height=20, wrap="word")
-    log_box.pack(fill="both", expand=True, padx=10)
-
-    scrollbar = tk.Scrollbar(log_box)
-    scrollbar.pack(side="right", fill="y")
-    log_box.config(yscrollcommand=scrollbar.set)
-    scrollbar.config(command=log_box.yview)
-
-    def update_log(msg):
-        log_box.insert("end", f"{msg}\n")
-        log_box.see("end")
-
-    def back_to_entry():
-        root.destroy()
-        GUI.teamRegistration()
-
-    tk.Button(center_frame, text="Return to Player Entry", command=back_to_entry, bg="#FFFF33", fg="black").pack(pady=10)
-
-    import udpServer
-    threading.Thread(target=udpServer.run_server, args=(score_labels, player_frames), daemon=True).start()
-
-    def flash_high_team():
-        while True:
-            try:
-                r_score = int(score_labels["Red"].cget("text").split(":")[1])
-                g_score = int(score_labels["Green"].cget("text").split(":")[1])
-                if r_score > g_score:
-                    score_labels["Red"].config(fg="red" if score_labels["Red"].cget("fg") != "red" else "yellow")
-                elif g_score > r_score:
-                    score_labels["Green"].config(fg="green" if score_labels["Green"].cget("fg") != "green" else "yellow")
-                root.after(1500)
-            except Exception:
-                break
-
-    threading.Thread(target=flash_high_team, daemon=True).start()
-    threading.Thread(target=randomMusic.play, daemon=True).start()
-
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.title("Player Actions")
+    root.geometry("800x600")
+    start_game(root)
     root.mainloop()
 
-def send_game_end_signal():
-    import udpSocket
-    for _ in range(3):
-        udpSocket.transmit_equipment_code("221")
+
 
 
 
