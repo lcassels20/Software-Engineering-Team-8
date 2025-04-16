@@ -36,7 +36,7 @@ def main():
     def start_game():
         print("START GAME FUNCTION TRIGGERED")
         udpSocket.transmit_equipment_code("202")
-        GUI.launch_game_screen()  # This calls playerAction.start_game internally
+        playerAction.launch_game_screen()  # This calls playerAction.start_game internally
 
         def send_game_end_codes():
             time.sleep(360)
