@@ -5,22 +5,15 @@ from database import (
     insert_player, player_exists, get_player_code_name,
     get_player_count, update_equipment_id
 )
-import udpSocket  # Transmits equipment codes after player addition
-import playerAction  # For transitioning to the player action screen
-import config  # Import network configuration
+import udpSocket
+import playerAction
+import config
 
-# Global lists to store players added in this session.
 red_players = []
 green_players = []
-
-# Global variable to hold the main Tk instance
 app_root = None
 
 def set_animated_background(parent_frame, gif_path):
-    """
-    Loads an animated GIF, places it behind all widgets in parent_frame,
-    and continuously animates it.
-    """
     frames = []
     with Image.open(gif_path) as im:
         try:
@@ -33,7 +26,7 @@ def set_animated_background(parent_frame, gif_path):
 
     bg_label = tk.Label(parent_frame)
     bg_label.place(x=0, y=0, relwidth=1, relheight=1)
-    
+
     tk_frames = []
     parent_frame.update_idletasks()
     width = parent_frame.winfo_width() or 640
@@ -41,16 +34,16 @@ def set_animated_background(parent_frame, gif_path):
     for frame in frames:
         resized = frame.resize((width, height), Image.Resampling.LANCZOS)
         tk_frames.append(ImageTk.PhotoImage(resized))
-    
+
     def animate(idx=0):
         bg_label.config(image=tk_frames[idx])
         parent_frame.after(100, animate, (idx + 1) % len(tk_frames))
-    
+
     if tk_frames:
         animate(0)
-    
+
     bg_label.lower()
-    
+
     def on_resize(event):
         new_width = event.width
         new_height = event.height
@@ -59,14 +52,10 @@ def set_animated_background(parent_frame, gif_path):
             resized = frame.resize((new_width, new_height), Image.Resampling.LANCZOS)
             new_tk_frames.append(ImageTk.PhotoImage(resized))
         tk_frames[:] = new_tk_frames
-    
+
     parent_frame.bind("<Configure>", on_resize)
 
 def display_splash_screen(root, callback):
-    """
-    Displays 'splashbg.gif' (resized to fill the window) as the animated background.
-    After 6 seconds, the splash screen is removed and 'callback()' is called.
-    """
     global app_root
     app_root = root
 
@@ -107,14 +96,10 @@ def display_splash_screen(root, callback):
 
     root.splash_after_id = root.after(6000, after_callback)
 
-def start_registration():
-    """
-    Displays a network settings prompt on a yellow background with a yellow border
-    matching the splash screen.
-    """
+def start_registration(start_game_callback=None):
     network_frame = tk.Frame(app_root, bg="#AB7E02", highlightthickness=2, highlightbackground="#FFFF33")
     network_frame.pack(fill=tk.BOTH, expand=True)
-    
+
     try:
         logo_network_img_pil = Image.open("logoNetwork.png").convert("RGBA")
         logo_network_img = ImageTk.PhotoImage(logo_network_img_pil)
@@ -146,7 +131,7 @@ def start_registration():
         network_frame,
         text="Change network",
         font=("Arial", 20),
-        command=lambda: [network_frame.destroy(), show_network_selection()],
+        command=lambda: [network_frame.destroy(), show_network_selection(start_game_callback)],
         borderwidth=0, highlightthickness=0, relief="flat",
         bg="#AB7E02", activebackground="#AB7E02", fg="white"
     )
@@ -156,19 +141,15 @@ def start_registration():
         network_frame,
         text="Play",
         font=("Arial", 20),
-        command=lambda: [network_frame.destroy(), teamRegistration()],
+        command=lambda: [network_frame.destroy(), teamRegistration(start_game_callback)],
         borderwidth=0, highlightthickness=0, relief="flat",
         bg="#AB7E02", activebackground="#AB7E02", fg="white"
     )
     no_button.pack(pady=5)
-
-def show_network_selection():
-    """
-    A separate screen to select a new network address from presets.
-    """
+def show_network_selection(start_game_callback=None):
     network_settings_frame = tk.Frame(app_root, bg="#AB7E02", highlightthickness=2, highlightbackground="#FFFF33")
     network_settings_frame.pack(fill=tk.BOTH, expand=True)
-    
+
     instruction_label = tk.Label(
         network_settings_frame,
         text="Select a new network address:",
@@ -177,7 +158,7 @@ def show_network_selection():
         font=("Helvetica", 16)
     )
     instruction_label.pack(pady=20)
-    
+
     def handle_network_selection(addr):
         if addr == "custom":
             new_addr = simpledialog.askstring("Custom Network", "Enter a custom network address:", parent=network_settings_frame)
@@ -190,13 +171,13 @@ def show_network_selection():
             config.NETWORK_ADDRESS = addr
             messagebox.showinfo("Info", f"Network address updated to {addr}")
         network_settings_frame.destroy()
-        teamRegistration()
-    
+        teamRegistration(start_game_callback)
+
     preset_addresses = [
         ("Custom", "custom"),
         ("Default", "127.0.0.1")
     ]
-    
+
     for text, addr in preset_addresses:
         btn = tk.Button(
             network_settings_frame,
@@ -207,11 +188,11 @@ def show_network_selection():
             bg="#AB7E02", activebackground="#AB7E02", fg="white"
         )
         btn.pack(pady=10)
-    
+
     cancel_btn = tk.Button(
         network_settings_frame,
         text="Cancel",
-        command=lambda: [network_settings_frame.destroy(), teamRegistration()],
+        command=lambda: [network_settings_frame.destroy(), teamRegistration(start_game_callback)],
         font=("Helvetica", 14),
         borderwidth=0, highlightthickness=0, relief="flat",
         bg="#AB7E02", activebackground="#AB7E02", fg="white"
@@ -219,16 +200,13 @@ def show_network_selection():
     cancel_btn.pack(pady=10)
 
 def countdown_screen(callback):
-    """
-    Displays a full-window countdown (30 to 1, "Game Starting") on a solid yellow background.
-    The background color (#FFFF33) matches your border color. The network logo appears at the top,
-    and the countdown (in Arial) is positioned towards the bottom.
-    """
-    # Create an overlay frame with a solid yellow background (same as border)
+    import threading
+    import randomMusic
+    threading.Thread(target=randomMusic.play, daemon=True).start()
+
     countdown_frame = tk.Frame(app_root, bg="#AB7E02")
     countdown_frame.place(relwidth=1, relheight=1)
-    
-    # Display the network logo at the top
+
     try:
         logo_img_pil = Image.open("logoNetwork.png").convert("RGBA")
         logo_img = ImageTk.PhotoImage(logo_img_pil)
@@ -237,20 +215,29 @@ def countdown_screen(callback):
         logo_label.pack(side="top", pady=20)
     except Exception as e:
         print("Error loading logoNetwork.png for countdown:", e)
-    
-    # Create a countdown label positioned towards the bottom center
+
     countdown_label = tk.Label(countdown_frame, text="", font=("Arial", 72), fg="White", bg="#AB7E02")
     countdown_label.place(relx=0.5, rely=0.8, anchor="center")
-    
+
     def update_count(i):
         if i > 0:
             countdown_label.config(text=str(i))
-            countdown_frame.after(1000, update_count, i-1)
+            countdown_frame.after(1000, update_count, i - 1)
         else:
             countdown_label.config(text="Game Starting")
             countdown_frame.after(500, lambda: [countdown_frame.destroy(), callback()])
-    
+
     update_count(30)
+def clear_all_entries(red_container, green_container):
+    print("Clear All Entries triggered (Red + Green)")
+    red_players.clear()
+    green_players.clear()
+    if red_container:
+        for widget in red_container.winfo_children():
+            widget.destroy()
+    if green_container:
+        for widget in green_container.winfo_children():
+            widget.destroy()
 
 def popup_add_player(team, container):
     popup = tk.Toplevel(app_root)
@@ -265,7 +252,7 @@ def popup_add_player(team, container):
     )
     player_id_entry = tk.Entry(popup)
     player_id_entry.grid(row=0, column=1, padx=10, pady=10)
-    
+
     def on_next():
         player_id = player_id_entry.get().strip()
         if not player_id:
@@ -353,40 +340,25 @@ def popup_add_player(team, container):
         label.pack(padx=10, pady=5)
         container.update_idletasks()
         popup.destroy()
-
-def clear_all_entries(red_container, green_container):
-    print("Clear All Entries triggered (Red + Green)")
-    red_players.clear()
-    green_players.clear()
-    if red_container:
-        for widget in red_container.winfo_children():
-            widget.destroy()
-    if green_container:
-        for widget in green_container.winfo_children():
-            widget.destroy()
-
-def teamRegistration():
+def teamRegistration(start_game_callback=None):
     registration = tk.Frame(app_root, bg="black", highlightthickness=2, highlightbackground="#FFFF33")
     registration.pack(fill=tk.BOTH, expand=True)
-    
+
     content_frame = tk.Frame(registration, bg="black")
     content_frame.pack(fill=tk.BOTH, expand=True)
     content_frame.grid_rowconfigure(0, weight=1)
     content_frame.grid_columnconfigure(0, weight=1)
     content_frame.grid_columnconfigure(1, weight=1)
-    
-    # ------------------ RED TEAM (Left) ------------------
+
+    # RED TEAM FRAME
     redFrame = tk.Frame(content_frame, highlightthickness=2, highlightbackground="#FFFF33")
     redFrame.grid(row=0, column=0, sticky="nsew")
     redFrame.config(width=640, height=480)
     redFrame.pack_propagate(False)
-    
     set_animated_background(redFrame, "redprg.gif")
-    
     red_player_container = tk.Frame(redFrame, bd=0)
     red_player_container.place(relx=0.5, rely=0.5, anchor="center")
-    
-    # Create a Button sized to the PNG image for "Add Player"
+
     try:
         add_red_img_pil = Image.open("addPlayer.png").convert("RGBA")
         add_red_img = ImageTk.PhotoImage(add_red_img_pil)
@@ -398,16 +370,12 @@ def teamRegistration():
         redFrame,
         image=add_red_img,
         command=lambda: popup_add_player("Red", red_player_container),
-        borderwidth=0,
-        highlightthickness=0,
-        relief=tk.FLAT,
-        width=add_red_img.width(),
-        height=add_red_img.height()
+        borderwidth=0, highlightthickness=0, relief=tk.FLAT,
+        width=add_red_img.width(), height=add_red_img.height()
     )
     add_red_button.place(relx=0.2, rely=0.9, anchor="center")
     add_red_button.image = add_red_img
 
-    # "Submit Players" button for Red
     try:
         submitRed_img_pil = Image.open("submitPlayers.png").convert("RGBA")
         submitRed_img = ImageTk.PhotoImage(submitRed_img_pil)
@@ -419,16 +387,12 @@ def teamRegistration():
         redFrame,
         image=submitRed_img,
         command=lambda: print("Red team submission (players stored in session)"),
-        borderwidth=0,
-        highlightthickness=0,
-        relief=tk.FLAT,
-        width=submitRed_img.width(),
-        height=submitRed_img.height()
+        borderwidth=0, highlightthickness=0, relief=tk.FLAT,
+        width=submitRed_img.width(), height=submitRed_img.height()
     )
     submit_red_button.place(relx=0.5, rely=0.9, anchor="center")
     submit_red_button.image = submitRed_img
 
-    # "Clear All" button for Red
     try:
         clear_all_img_pil = Image.open("clearEntries.png").convert("RGBA")
         clear_all_img = ImageTk.PhotoImage(clear_all_img_pil)
@@ -440,70 +404,21 @@ def teamRegistration():
         redFrame,
         image=clear_all_img,
         command=lambda: clear_all_entries(red_player_container, green_player_container),
-        borderwidth=0,
-        highlightthickness=0,
-        relief=tk.FLAT,
-        width=clear_all_img.width(),
-        height=clear_all_img.height()
+        borderwidth=0, highlightthickness=0, relief=tk.FLAT,
+        width=clear_all_img.width(), height=clear_all_img.height()
     )
     clear_all_button.place(relx=0.8, rely=0.9, anchor="center")
     clear_all_button.image = clear_all_img
 
-    # ------------------ GREEN TEAM (Right) ------------------
+    # GREEN TEAM FRAME
     greenFrame = tk.Frame(content_frame, highlightthickness=2, highlightbackground="#FFFF33")
     greenFrame.grid(row=0, column=1, sticky="nsew")
     greenFrame.config(width=640, height=480)
     greenFrame.pack_propagate(False)
-    
     set_animated_background(greenFrame, "greenrpg.gif")
-    
     green_player_container = tk.Frame(greenFrame, bd=0)
     green_player_container.place(relx=0.5, rely=0.5, anchor="center")
 
-    # "Start Game" button for Green
-    try:
-        start_img_pil = Image.open("startGame.png").convert("RGBA")
-        start_img = ImageTk.PhotoImage(start_img_pil)
-    except Exception as e:
-        print("Error loading startGame.png:", e)
-        start_img = None
-
-    start_game_button = tk.Button(
-        greenFrame,
-        image=start_img,
-        # Instead of directly starting the game, call countdown_screen first.
-        command=lambda: countdown_screen(lambda: playerAction.start_game(app_root, players=red_players + green_players)),
-        borderwidth=0,
-        highlightthickness=0,
-        relief=tk.FLAT,
-        width=start_img.width(),
-        height=start_img.height()
-    )
-    start_game_button.place(relx=0.2, rely=0.9, anchor="center")
-    start_game_button.image = start_img
-
-    # "Submit Players" button for Green
-    try:
-        submitGreen_img_pil = Image.open("submitPlayers.png").convert("RGBA")
-        submitGreen_img = ImageTk.PhotoImage(submitGreen_img_pil)
-    except Exception as e:
-        print("Error loading submitPlayers.png:", e)
-        submitGreen_img = None
-
-    submit_green_button = tk.Button(
-        greenFrame,
-        image=submitGreen_img,
-        command=lambda: print("Green team submission (players stored in session)"),
-        borderwidth=0,
-        highlightthickness=0,
-        relief=tk.FLAT,
-        width=submitGreen_img.width(),
-        height=submitGreen_img.height()
-    )
-    submit_green_button.place(relx=0.5, rely=0.9, anchor="center")
-    submit_green_button.image = submitGreen_img
-
-    # "Add Player" button for Green
     try:
         add_green_img_pil = Image.open("addPlayer.png").convert("RGBA")
         add_green_img = ImageTk.PhotoImage(add_green_img_pil)
@@ -515,14 +430,46 @@ def teamRegistration():
         greenFrame,
         image=add_green_img,
         command=lambda: popup_add_player("Green", green_player_container),
-        borderwidth=0,
-        highlightthickness=0,
-        relief=tk.FLAT,
-        width=add_green_img.width(),
-        height=add_green_img.height()
+        borderwidth=0, highlightthickness=0, relief=tk.FLAT,
+        width=add_green_img.width(), height=add_green_img.height()
     )
     add_green_button.place(relx=0.8, rely=0.9, anchor="center")
     add_green_button.image = add_green_img
+
+    try:
+        submitGreen_img_pil = Image.open("submitPlayers.png").convert("RGBA")
+        submitGreen_img = ImageTk.PhotoImage(submitGreen_img_pil)
+    except Exception as e:
+        print("Error loading submitPlayers.png:", e)
+        submitGreen_img = None
+
+    submit_green_button = tk.Button(
+        greenFrame,
+        image=submitGreen_img,
+        command=lambda: print("Green team submission (players stored in session)"),
+        borderwidth=0, highlightthickness=0, relief=tk.FLAT,
+        width=submitGreen_img.width(), height=submitGreen_img.height()
+    )
+    submit_green_button.place(relx=0.5, rely=0.9, anchor="center")
+    submit_green_button.image = submitGreen_img
+
+    try:
+        start_img_pil = Image.open("startGame.png").convert("RGBA")
+        start_img = ImageTk.PhotoImage(start_img_pil)
+    except Exception as e:
+        print("Error loading startGame.png:", e)
+        start_img = None
+
+    start_game_button = tk.Button(
+        greenFrame,
+        image=start_img,
+        command=lambda: countdown_screen(lambda: playerAction.start_game(app_root, players=red_players + green_players)),
+        borderwidth=0, highlightthickness=0, relief=tk.FLAT,
+        width=start_img.width(), height=start_img.height()
+    )
+    start_game_button.place(relx=0.2, rely=0.9, anchor="center")
+    start_game_button.image = start_img
+
 
 
 
