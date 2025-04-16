@@ -26,7 +26,7 @@ UDPSocketSend = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 # Set up receiving socket
 UDPServerSocketReceive = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-UDPServerSocketReceive.bind(("", receive_port))
+UDPServerSocketReceive.bind(("", 0))
 
 # Send initial setup messages
 startup_messages = ["EQ12345", red1, red2, green1, green2]
