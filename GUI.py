@@ -109,7 +109,7 @@ def display_splash_screen(root, callback):
 
     root.splash_after_id = root.after(6000, after_callback)
 
-def start_registration():
+def start_registration(start_game_callback=None):
     """
     Displays a network settings prompt on a yellow background with a yellow border
     matching the splash screen.
@@ -158,7 +158,7 @@ def start_registration():
         network_frame,
         text="Play",
         font=("Arial", 20),
-        command=lambda: [network_frame.destroy(), teamRegistration()],
+        command=lambda: [network_frame.destroy(), teamRegistration(start_game_callback)],
         borderwidth=0, highlightthickness=0, relief="flat",
         bg="#AB7E02", activebackground="#AB7E02", fg="white"
     )
@@ -361,7 +361,7 @@ def clear_all_entries(red_container, green_container):
         for widget in green_container.winfo_children():
             widget.destroy()
 
-def teamRegistration():
+def teamRegistration(start_game_callback=None):
     registration = tk.Frame(app_root, bg="black", highlightthickness=2, highlightbackground="#FFFF33")
     registration.pack(fill=tk.BOTH, expand=True)
     
