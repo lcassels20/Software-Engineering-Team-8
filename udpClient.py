@@ -6,7 +6,7 @@ def run_client():
     UDPClientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     
     # The client sends its message to the server's receiving port (7501).
-    serverAddressPort = (config.NETWORK_ADDRESS, 7501)
+    serverAddressPort = (config.NETWORK_ADDRESS, 7502)
     msgFromClient = "Hello UDP Server"
     bytesToSend = msgFromClient.encode()
     
