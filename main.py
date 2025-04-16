@@ -30,7 +30,7 @@ def main():
     def after_splash():
         # Start background socket broadcasts and client after splash screen is gone
         threading.Thread(target=udpSocket.transmit_equipment_code, args=("EQ12345",), daemon=True).start()
-        threading.Thread(target=udpClient.run_client, daemon=True).start()
+        #threading.Thread(target=udpClient.run_client, daemon=True).start()
         GUI.start_registration()
 
     GUI.display_splash_screen(root, after_splash)
