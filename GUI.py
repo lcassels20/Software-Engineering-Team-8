@@ -468,7 +468,7 @@ def teamRegistration(start_game_callback=None):
         greenFrame,
         image=start_img,
         # Instead of directly starting the game, call countdown_screen first.
-        command=lambda: countdown_screen(lambda: playerAction.start_game(app_root, players=red_players + green_players)),
+        command=lambda: countdown_screen(start_game_callback),
         borderwidth=0,
         highlightthickness=0,
         relief=tk.FLAT,
