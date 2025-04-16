@@ -1,3 +1,5 @@
+import threading
+import randomMusic
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 from PIL import Image, ImageTk, ImageSequence
@@ -219,16 +221,11 @@ def show_network_selection():
     cancel_btn.pack(pady=10)
 
 def countdown_screen(callback):
-    """
-    Displays a full-window countdown (30 to 1, "Game Starting") on a solid yellow background.
-    The background color (#FFFF33) matches your border color. The network logo appears at the top,
-    and the countdown (in Arial) is positioned towards the bottom.
-    """
-    # Create an overlay frame with a solid yellow background (same as border)
+    threading.Thread(target=randomMusic.play, daemon=True).start()
+
     countdown_frame = tk.Frame(app_root, bg="#AB7E02")
     countdown_frame.place(relwidth=1, relheight=1)
-    
-    # Display the network logo at the top
+
     try:
         logo_img_pil = Image.open("logoNetwork.png").convert("RGBA")
         logo_img = ImageTk.PhotoImage(logo_img_pil)
@@ -237,19 +234,18 @@ def countdown_screen(callback):
         logo_label.pack(side="top", pady=20)
     except Exception as e:
         print("Error loading logoNetwork.png for countdown:", e)
-    
-    # Create a countdown label positioned towards the bottom center
+
     countdown_label = tk.Label(countdown_frame, text="", font=("Arial", 72), fg="White", bg="#AB7E02")
     countdown_label.place(relx=0.5, rely=0.8, anchor="center")
-    
+
     def update_count(i):
         if i > 0:
             countdown_label.config(text=str(i))
-            countdown_frame.after(1000, update_count, i-1)
+            countdown_frame.after(1000, update_count, i - 1)
         else:
             countdown_label.config(text="Game Starting")
             countdown_frame.after(500, lambda: [countdown_frame.destroy(), callback()])
-    
+
     update_count(30)
 
 def popup_add_player(team, container):
