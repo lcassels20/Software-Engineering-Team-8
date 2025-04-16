@@ -1,9 +1,8 @@
 import socket
 import config
+from playerAction import handle_score_event, handle_base_hit, player_scores
 
 def run_server(score_labels=None, player_frames=None):
-    from playerAction import handle_score_event, handle_base_hit, player_scores
-
     localIP = config.NETWORK_ADDRESS
     localPort = 7501
     bufferSize = 1024
@@ -42,15 +41,25 @@ def run_server(score_labels=None, player_frames=None):
                     print("Shooter ID not found for base hit:", shooter_id)
                     reply = "INVALID"
             elif shooter_id in player_scores:
-                team = player_scores[shooter_id]["team"]
-                print(f"Handling event: {shooter_id} (shooter) hit {target_id} (target) on team {team}")
-                handle_score_event(
-                    shooter_id,
-                    team,
-                    score_labels[team],
-                    player_frames[team]
-                )
-                reply = str(target_id)
+                shooter_team = player_scores[shooter_id]["team"]
+                target_team = None
+                for pid, pdata in player_scores.items():
+                    if pid == target_id:
+                        target_team = pdata["team"]
+                        break
+                if target_team == shooter_team:
+                    print(f"{shooter_id} tagged their own team member {target_id} — penalty")
+                    player_scores[shooter_id]["score"] -= 10
+                    reply = str(shooter_id)
+                else:
+                    print(f"Handling event: {shooter_id} (shooter) hit {target_id} (target) on opposing team")
+                    handle_score_event(
+                        shooter_id,
+                        shooter_team,
+                        score_labels[shooter_team],
+                        player_frames[shooter_team]
+                    )
+                    reply = str(target_id)
             else:
                 print("Shooter ID not found in player_scores:", shooter_id)
                 reply = "INVALID"
@@ -64,6 +73,7 @@ def run_server(score_labels=None, player_frames=None):
 
 if __name__ == "__main__":
     run_server()
+
 
 
 
