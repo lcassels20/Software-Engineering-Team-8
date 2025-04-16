@@ -124,7 +124,12 @@ def start_game(root, players=None):
         else:
             timer_label.config(text="Game Over")
             print("Game Over")
-
+            
+    score_labels = {"Red": red_score_label, "Green": green_score_label}
+    player_frames = {"Red": red_players_frame, "Green": green_players_frame}
+    threading.Thread(target=udpServer.run_server, args=(score_labels, player_frames), daemon=True).start()
+    threading.Thread(target=play_random_music, daemon=True).start()
+    
     # Send '202' to traffic generator immediately
     signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     signal_sock.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
@@ -132,11 +137,7 @@ def start_game(root, players=None):
 
     update_timer(360)  # Start 6-minute game timer immediately
 
-    # Start background server and music
-    score_labels = {"Red": red_score_label, "Green": green_score_label}
-    player_frames = {"Red": red_players_frame, "Green": green_players_frame}
-    threading.Thread(target=udpServer.run_server, args=(score_labels, player_frames), daemon=True).start()
-    threading.Thread(target=play_random_music, daemon=True).start()
+    
 
 def handle_score_event(player_id, team, score_label, players_frame):
     if player_id not in player_scores:
