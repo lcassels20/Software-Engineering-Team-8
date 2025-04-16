@@ -18,6 +18,7 @@ def run_server(score_labels=None, player_frames=None):
         address = bytesAddressPair[1]
 
         print("UDP Server received message:", message)
+        print("Current player_scores keys:", list(player_scores.keys()))
 
         if ":" in message and score_labels and player_frames:
             shooter_str, target_str = message.split(":")
@@ -30,6 +31,7 @@ def run_server(score_labels=None, player_frames=None):
 
             if shooter_id in player_scores:
                 team = player_scores[shooter_id]["team"]
+                print(f"Handling event: {shooter_id} (shooter) hit {target_id} (target) on team {team}")
                 handle_score_event(
                     shooter_id,
                     team,
@@ -52,5 +54,6 @@ def run_server(score_labels=None, player_frames=None):
 
 if __name__ == "__main__":
     run_server()
+
 
 
