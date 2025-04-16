@@ -11,3 +11,4 @@ def transmit_equipment_code(equipment_code):
 
 if __name__ == "__main__":
     transmit_equipment_code("EQ12345")
+
