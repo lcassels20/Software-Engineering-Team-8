@@ -26,7 +26,7 @@ UDPSocketSend = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 # Set up receiving socket
 UDPServerSocketReceive = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-UDPServerSocketReceive.bind(("", receive_port))
+UDPServerSocketReceive.bind(("", 0))
 UDPServerSocketReceive.settimeout(1.0)  # <-- One-line fix to avoid freeze
 
 # Send initial setup messages
