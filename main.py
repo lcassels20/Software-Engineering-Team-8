@@ -2,10 +2,10 @@ import database
 import threading
 import time
 import tkinter as tk
-import GUI
-import udpSocket
-import udpClient
-import playerAction
+
+import GUI            # provides display_splash_screen(root, callback) and teamRegistration()
+import udpSocket      # provides transmit_equipment_code()
+import udpClient      # provides run_client()
 
 def main():
     database.create_players_table()
@@ -25,28 +25,19 @@ def main():
             except Exception as e:
                 print("Error cancelling splash_after_id:", e)
         root.destroy()
-
     root.protocol("WM_DELETE_WINDOW", on_closing)
 
     def after_splash():
+        # Start background socket broadcasts and client after splash screen is gone
         threading.Thread(target=udpSocket.transmit_equipment_code, args=("EQ12345",), daemon=True).start()
         threading.Thread(target=udpClient.run_client, daemon=True).start()
-        GUI.start_registration(start_game_callback=start_game)
-
-    def start_game():
-        print("START GAME FUNCTION TRIGGERED")
-        udpSocket.transmit_equipment_code("202")
-        playerAction.launch_game_screen()  # This calls playerAction.start_game internally
-
-        def send_game_end_codes():
-            time.sleep(360)
-            playerAction.send_game_end_signal()
-
-        threading.Thread(target=send_game_end_codes, daemon=True).start()
+        GUI.start_registration()
 
     GUI.display_splash_screen(root, after_splash)
+
     root.mainloop()
 
 if __name__ == "__main__":
     main()
+
 
