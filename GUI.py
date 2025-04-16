@@ -463,7 +463,7 @@ def teamRegistration(start_game_callback=None):
     start_game_button = tk.Button(
         greenFrame,
         image=start_img,
-        command=lambda: countdown_screen(lambda: playerAction.start_game(app_root, players=red_players + green_players)),
+        command=lambda: countdown_screen(playerAction.launch_game_screen),
         borderwidth=0, highlightthickness=0, relief=tk.FLAT,
         width=start_img.width(), height=start_img.height()
     )
