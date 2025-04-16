@@ -40,7 +40,7 @@ print("\nwaiting for start from game_software")
 start_received = False
 UDPServerSocketReceive.setblocking(0)
 
-timeout = time.time() + 20  # 20 sec timeout
+timeout = time.time() + 60  # 20 sec timeout
 while time.time() < timeout:
     ready = select.select([UDPServerSocketReceive], [], [], 1)
     if ready[0]:
