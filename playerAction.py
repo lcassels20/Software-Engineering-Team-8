@@ -31,6 +31,7 @@ def create_scrollable_frame(parent, height):
     return scroll_frame
 
 def start_game(root, players=None):
+    print("START GAME FUNCTION TRIGGERED")
     global player_scores
 
     for widget in root.winfo_children():
