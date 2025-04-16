@@ -5,14 +5,13 @@ def run_server(score_labels=None, player_frames=None):
     from playerAction import handle_score_event, player_scores
 
     localIP = config.NETWORK_ADDRESS
-    localPort = 7501  # Receiving port
+    localPort = 7501  # ✅ CORRECT: game listens on 7501
     bufferSize = 1024
 
     UDPServerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    # Permanent fix to avoid OSError: [Errno 98] Address already in use
     UDPServerSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
     UDPServerSocket.bind((localIP, localPort))
+
     print("UDP server up and listening on", localIP, ":", localPort)
 
     while True:
@@ -56,6 +55,7 @@ def run_server(score_labels=None, player_frames=None):
 
 if __name__ == "__main__":
     run_server()
+
 
 
 
