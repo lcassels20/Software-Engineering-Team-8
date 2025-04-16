@@ -64,7 +64,6 @@ def handle_base_hit(player_id, team, score_label, players_frame):
                          bg=players_frame["bg"], fg="#FFFF33", font=("Arial", 12))
         label.pack(anchor="w", pady=2)
 
-
 def launch_game_screen():
     import tkinter as tk
     import threading
@@ -127,35 +126,32 @@ def launch_game_screen():
 
     tk.Button(center_frame, text="Return to Player Entry", command=back_to_entry, bg="#FFFF33", fg="black").pack(pady=10)
 
-    # Start server in new thread
     import udpServer
     threading.Thread(target=udpServer.run_server, args=(score_labels, player_frames), daemon=True).start()
 
-    # Flash high score team
     def flash_high_team():
         while True:
-            r_score = int(score_labels["Red"].cget("text").split(":")[1])
-            g_score = int(score_labels["Green"].cget("text").split(":")[1])
-            if r_score > g_score:
-                score_labels["Red"].config(fg="red" if score_labels["Red"].cget("fg") != "red" else "yellow")
-            elif g_score > r_score:
-                score_labels["Green"].config(fg="green" if score_labels["Green"].cget("fg") != "green" else "yellow")
-            root.after(1000, lambda: None)
-            time.sleep(1.5)
+            try:
+                r_score = int(score_labels["Red"].cget("text").split(":")[1])
+                g_score = int(score_labels["Green"].cget("text").split(":")[1])
+                if r_score > g_score:
+                    score_labels["Red"].config(fg="red" if score_labels["Red"].cget("fg") != "red" else "yellow")
+                elif g_score > r_score:
+                    score_labels["Green"].config(fg="green" if score_labels["Green"].cget("fg") != "green" else "yellow")
+                root.after(1500)
+            except Exception:
+                break
 
     threading.Thread(target=flash_high_team, daemon=True).start()
-
-    # Play background music
     threading.Thread(target=randomMusic.play, daemon=True).start()
 
     root.mainloop()
 
-
+def send_game_end_signal():
     import udpSocket
     for _ in range(3):
         udpSocket.transmit_equipment_code("221")
 
-    root.mainloop()
 
 
 
