@@ -3,6 +3,7 @@ import config
 
 def run_server(score_labels=None, player_frames=None):
     from playerAction import handle_score_event, player_scores
+
     localIP = config.NETWORK_ADDRESS
     localPort = 7501  # Receiving port
     bufferSize = 1024
@@ -15,15 +16,16 @@ def run_server(score_labels=None, player_frames=None):
         bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
         message = bytesAddressPair[0].decode()
         address = bytesAddressPair[1]
+
         print("UDP Server received message:", message)
 
-        # Handle score event if it's an ID pair
         if ":" in message and score_labels and player_frames:
             shooter_str, target_str = message.split(":")
             try:
                 shooter_id = int(shooter_str)
+                target_id = int(target_str)
             except ValueError:
-                print("Invalid shooter ID:", shooter_str)
+                print("Invalid IDs in message:", message)
                 continue
 
             if shooter_id in player_scores:
@@ -34,13 +36,21 @@ def run_server(score_labels=None, player_frames=None):
                     score_labels[team],
                     player_frames[team]
                 )
+
+                # Send back the equipment ID of the player who got hit
+                UDPServerSocket.sendto(str(target_id).encode(), address)
+                continue
             else:
                 print("Shooter ID not found in player_scores:", shooter_id)
 
-        # Always reply
-        reply = "OK" if message.strip() != "221" else "221"
-        UDPServerSocket.sendto(reply.encode(), address)
+        elif message.strip() == "221":
+            # Game over signal — send 221 reply
+            UDPServerSocket.sendto(b"221", address)
+        else:
+            # Default reply if no specific action
+            UDPServerSocket.sendto(b"OK", address)
 
 if __name__ == "__main__":
     run_server()
+
 
