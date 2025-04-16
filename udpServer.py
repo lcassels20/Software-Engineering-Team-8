@@ -2,10 +2,10 @@ import socket
 import config
 
 def run_server(score_labels=None, player_frames=None):
-    from playerAction import handle_score_event, player_scores
+    from playerAction import handle_score_event, handle_base_hit, player_scores
 
     localIP = config.NETWORK_ADDRESS
-    localPort = 7501  # Game listens here
+    localPort = 7501
     bufferSize = 1024
 
     UDPServerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -32,7 +32,16 @@ def run_server(score_labels=None, player_frames=None):
                 UDPServerSocket.sendto(b"INVALID", address)
                 continue
 
-            if shooter_id in player_scores:
+            if target_id == 43 or target_id == 53:
+                if shooter_id in player_scores:
+                    print(f"Base hit: {shooter_id} tagged base {target_id}")
+                    team = player_scores[shooter_id]["team"]
+                    handle_base_hit(shooter_id, team, score_labels[team], player_frames[team])
+                    reply = str(target_id)
+                else:
+                    print("Shooter ID not found for base hit:", shooter_id)
+                    reply = "INVALID"
+            elif shooter_id in player_scores:
                 team = player_scores[shooter_id]["team"]
                 print(f"Handling event: {shooter_id} (shooter) hit {target_id} (target) on team {team}")
                 handle_score_event(
@@ -55,6 +64,7 @@ def run_server(score_labels=None, player_frames=None):
 
 if __name__ == "__main__":
     run_server()
+
 
 
 
