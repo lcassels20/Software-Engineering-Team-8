@@ -27,6 +27,7 @@ def run_server(score_labels=None, player_frames=None):
                 target_id = int(target_str)
             except ValueError:
                 print("Invalid IDs in message:", message)
+                UDPServerSocket.sendto(b"INVALID", address)
                 continue
 
             if shooter_id in player_scores:
@@ -38,18 +39,16 @@ def run_server(score_labels=None, player_frames=None):
                     score_labels[team],
                     player_frames[team]
                 )
-
-                # Send back the equipment ID of the player who got hit
-                UDPServerSocket.sendto(str(target_id).encode(), address)
-                continue
+                reply = str(target_id)
             else:
                 print("Shooter ID not found in player_scores:", shooter_id)
+                reply = "INVALID"
+
+            UDPServerSocket.sendto(reply.encode(), address)
 
         elif message.strip() == "221":
-            # Game over signal — send 221 reply
             UDPServerSocket.sendto(b"221", address)
         else:
-            # Default reply if no specific action
             UDPServerSocket.sendto(b"OK", address)
 
 if __name__ == "__main__":
