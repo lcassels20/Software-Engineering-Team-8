@@ -26,8 +26,7 @@ UDPSocketSend = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 # Set up receiving socket
 UDPServerSocketReceive = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-UDPServerSocketReceive.bind(("", 0))
-UDPServerSocketReceive.settimeout(1.0)  # <-- One-line fix to avoid freeze
+UDPServerSocketReceive.bind(("", receive_port))
 
 # Send initial setup messages
 startup_messages = ["EQ12345", red1, red2, green1, green2]
@@ -38,20 +37,16 @@ for msg in startup_messages:
 # Wait for game to send "202"
 print("\nwaiting for start from game_software")
 while True:
-    try:
-        data, addr = UDPServerSocketReceive.recvfrom(bufferSize)
-        message = data.decode().strip()
-        print("Received from game software:", message)
-        if message == "202":
-            break
-    except socket.timeout:
-        continue
+    data, addr = UDPServerSocketReceive.recvfrom(bufferSize)
+    message = data.decode().strip()
+    print("Received from game software:", message)
+    if message == "202":
+        break
 
 # Now simulate traffic
 players = [red1, red2, green1, green2]
 print()
 while True:
-    # Randomly choose who hits who
     shooter = random.choice(players)
     target = random.choice([p for p in players if p != shooter])
     hit_message = f"{shooter}:{target}"
@@ -59,10 +54,7 @@ while True:
     print("transmitting to game:", hit_message)
     UDPSocketSend.sendto(hit_message.encode(), (game_ip, send_port))
 
-    try:
-        received_data, address = UDPServerSocketReceive.recvfrom(bufferSize)
-        print("received from game:", received_data.decode())
-    except socket.timeout:
-        print("No reply received from game (timeout)")
-
+    received_data, address = UDPServerSocketReceive.recvfrom(bufferSize)
+    print("received from game:", received_data.decode())
     time.sleep(2)
+
