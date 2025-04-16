@@ -24,3 +24,5 @@ def play():
     except Exception as e:
         print(f"Failed to play {selected_track}: {e}")
 
+
+
