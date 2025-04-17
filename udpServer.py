@@ -22,11 +22,14 @@ def run_server(score_labels=None, player_frames=None, log_event=None):
 
         if log_event:
             log_event(f"UDP: {message}")
+        else:
+            print("log_event is None")
 
         UDPServerSocket.sendto(b"OK", address)
 
 if __name__ == "__main__":
     run_server()
+
 
 
 
