@@ -75,7 +75,7 @@ This guide will walk you through installing the necessary software, configuring 
    ```sh
    cd trafficGenerator
    ```
-9. **Run this first typing in expected codes, then run the game in the other terminal**
+9. **Run this first typing in expected codes in trafficGenerator, then run the game in the other terminal**
 10. **Run the Code**
    **(First run database.py before running the main file to clear the table)**
    ```sh
