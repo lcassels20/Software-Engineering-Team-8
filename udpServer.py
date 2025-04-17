@@ -37,16 +37,17 @@ def run_server(score_labels=None, player_frames=None, event_label=None, player_s
 
                 shooter_name = player_scores_ref[shooter_id]["codename"]
 
+                # Handle base scoring
                 if target_id == 43 and player_scores_ref[shooter_id]["team"] == "Red":
                     print(f"Red player {shooter_id} scored on Green base!")
-                    handle_score_event(shooter_id, "Red", score_labels["Red"], player_frames["Red"], event_label)
+                    handle_score_event(shooter_id, "Red", score_labels["Red"], player_frames["Red"], event_label, player_scores_ref)
                     if event_label:
                         event_label.config(text=f"{shooter_name} scored on Green base!")
                     UDPServerSocket.sendto(b"43", address)
                     continue
                 elif target_id == 53 and player_scores_ref[shooter_id]["team"] == "Green":
                     print(f"Green player {shooter_id} scored on Red base!")
-                    handle_score_event(shooter_id, "Green", score_labels["Green"], player_frames["Green"], event_label)
+                    handle_score_event(shooter_id, "Green", score_labels["Green"], player_frames["Green"], event_label, player_scores_ref)
                     if event_label:
                         event_label.config(text=f"{shooter_name} scored on Red base!")
                     UDPServerSocket.sendto(b"53", address)
@@ -58,6 +59,7 @@ def run_server(score_labels=None, player_frames=None, event_label=None, player_s
                 UDPServerSocket.sendto(b"INVALID", address)
                 continue
 
+            # Standard hit handling
             team = player_scores_ref[shooter_id]["team"]
             print(f"Handling event: {shooter_id} (shooter) hit {target_id} (target) on team {team}")
             handle_score_event(
@@ -65,7 +67,8 @@ def run_server(score_labels=None, player_frames=None, event_label=None, player_s
                 team,
                 score_labels[team],
                 player_frames[team],
-                event_label
+                event_label,
+                player_scores_ref
             )
 
             if event_label:
@@ -77,12 +80,14 @@ def run_server(score_labels=None, player_frames=None, event_label=None, player_s
         elif message.strip() == "221":
             print("Game over signal received. Sending '221'")
             UDPServerSocket.sendto(b"221", address)
+
         else:
             print(f"Message '{message.strip()}' not understood. Sending default reply 'OK'")
             UDPServerSocket.sendto(b"OK", address)
 
 if __name__ == "__main__":
     run_server()
+
 
 
 
