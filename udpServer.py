@@ -13,60 +13,21 @@ def run_server(score_labels=None, player_frames=None, log_event=None):
     print("UDP server up and listening on", localIP, ":", localPort)
     print(">>> Waiting for messages...")
 
-    # Moved here to avoid circular import
-    from playerAction import handle_score_event, player_scores
-
     while True:
         bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
         message = bytesAddressPair[0].decode()
         address = bytesAddressPair[1]
 
         print("\nUDP Server received message:", message)
-        print("Current player_scores keys:", list(player_scores.keys()))
 
-        if ":" in message and score_labels and player_frames:
-            try:
-                shooter_str, target_str = message.split(":")
-                shooter_id = int(shooter_str)
-                target_id = int(target_str)
+        if log_event:
+            log_event(f"UDP: {message}")
 
-                if shooter_id not in player_scores:
-                    UDPServerSocket.sendto(b"UNKNOWN SHOOTER", address)
-                    continue
-
-                team = player_scores[shooter_id]["team"]
-
-                # Handle base hits
-                if target_id == 43 and team == "Red":
-                    handle_score_event(shooter_id, "Red", score_labels["Red"], player_frames["Red"])
-                    if log_event:
-                        log_event(f"Red base hit by player {shooter_id}")
-                    UDPServerSocket.sendto(b"43", address)
-                    continue
-                elif target_id == 53 and team == "Green":
-                    handle_score_event(shooter_id, "Green", score_labels["Green"], player_frames["Green"])
-                    if log_event:
-                        log_event(f"Green base hit by player {shooter_id}")
-                    UDPServerSocket.sendto(b"53", address)
-                    continue
-
-                # Regular player hit
-                handle_score_event(shooter_id, team, score_labels[team], player_frames[team])
-                if log_event:
-                    log_event(f"Player {shooter_id} hit Player {target_id} ({team} team)")
-                UDPServerSocket.sendto(str(target_id).encode(), address)
-
-            except ValueError:
-                UDPServerSocket.sendto(b"INVALID", address)
-        elif message.strip() == "221":
-            if log_event:
-                log_event("Game over signal received.")
-            UDPServerSocket.sendto(b"221", address)
-        else:
-            UDPServerSocket.sendto(b"OK", address)
+        UDPServerSocket.sendto(b"OK", address)
 
 if __name__ == "__main__":
     run_server()
+
 
 
 
