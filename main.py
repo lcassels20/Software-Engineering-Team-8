@@ -17,7 +17,8 @@ def main():
     root.attributes("-topmost", True)
     root.after(10, lambda: root.attributes("-topmost", False))
     root.bind("<Escape>", lambda e: root.attributes("-fullscreen", False))
-
+    after_ids = []
+    
     def on_closing():
         # Cancel splash screen delay if still scheduled
         if hasattr(root, "splash_after_id"):
