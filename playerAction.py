@@ -113,6 +113,12 @@ def start_game(root, players=None):
     timer_label = tk.Label(bottom_frame, text="", font=("Arial", 24), fg="black", bg="#AB7E02")
     timer_label.pack(pady=10)
 
+    # Launch UDP server *before* the countdown
+    score_labels = {"Red": red_score_label, "Green": green_score_label}
+    player_frames = {"Red": red_players_frame, "Green": green_players_frame}
+    print(">>> Launching UDP server thread now (before countdown)")
+    threading.Thread(target=udpServer.run_server, args=(score_labels, player_frames), daemon=True).start()
+
     def update_timer(seconds, is_game_timer=False):
         if seconds > 0:
             mins, secs = divmod(seconds, 60)
@@ -124,25 +130,23 @@ def start_game(root, players=None):
             if not is_game_timer:
                 timer_label.config(text="Game Started!")
                 print("Countdown finished — starting game.")
-    
+
                 # Send '202' to traffic generator
                 signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                 signal_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 signal_sock.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
-                print(" Sent '202' to traffic generator")
-    
-                # Start background server and music
-                score_labels = {"Red": red_score_label, "Green": green_score_label}
-                player_frames = {"Red": red_players_frame, "Green": green_players_frame}
-                threading.Thread(target=udpServer.run_server, args=(score_labels, player_frames), daemon=True).start()
-                threading.Thread(target=play_random_music, daemon=True).start()
-    
+                print("Sent '202' to traffic generator")
+
                 # Start actual 6-minute game timer
+                threading.Thread(target=play_random_music, daemon=True).start()
                 update_timer(360, is_game_timer=True)
             else:
                 timer_label.config(text="Game Over")
                 print("Game Over")
+
+    # Start pre-game countdown
     update_timer(30)
+
 def handle_score_event(player_id, team, score_label, players_frame):
     if player_id not in player_scores:
         print(f"Player ID {player_id} not found.")
@@ -157,7 +161,7 @@ def handle_score_event(player_id, team, score_label, players_frame):
 
     for widget in players_frame.winfo_children():
         widget.destroy()
-    for player_id, player_data in player_scores.items():
+    for player_id, player_data in sorted(player_scores.items(), key=lambda x: -x[1]["score"]):
         if player_data["team"] == team:
             text = f"ID: {player_id} | Name: {player_data['codename']} | Score: {player_data['score']}"
             label = tk.Label(players_frame, text=text, bg=players_frame["bg"], fg="#FFFF33", font=("Arial", 12))
@@ -169,6 +173,7 @@ if __name__ == "__main__":
     root.geometry("800x600")
     start_game(root)
     root.mainloop()
+
 
 
 
