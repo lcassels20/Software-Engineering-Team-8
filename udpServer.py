@@ -29,7 +29,7 @@ def run_server(score_labels=None, player_frames=None, log_event=None):
                 log(f"Error while receiving data: {e}")
                 continue
 
-            if ":" in msg and score_labels and player_frames:
+            if ":" in msg:
                 try:
                     shooter_str, target_str = msg.split(":")
                     shooter_id = int(shooter_str)
@@ -44,30 +44,34 @@ def run_server(score_labels=None, player_frames=None, log_event=None):
                     sock.sendto(b"UNKNOWN SHOOTER", addr)
                     continue
 
-                team = player_scores[shooter_id]["team"]
+                if score_labels and player_frames:
+                    team = player_scores[shooter_id]["team"]
 
-                # base hits
-                if target_id == 43 and team == "Red":
-                    log(f"Red base hit by player {shooter_id}")
-                    handle_score_event(shooter_id, "Red",
-                                       score_labels["Red"],
-                                       player_frames["Red"])
-                    sock.sendto(b"43", addr)
-                    continue
-                if target_id == 53 and team == "Green":
-                    log(f"Green base hit by player {shooter_id}")
-                    handle_score_event(shooter_id, "Green",
-                                       score_labels["Green"],
-                                       player_frames["Green"])
-                    sock.sendto(b"53", addr)
-                    continue
+                    # base hits
+                    if target_id == 43 and team == "Red":
+                        log(f"Red base hit by player {shooter_id}")
+                        handle_score_event(shooter_id, "Red",
+                                           score_labels["Red"],
+                                           player_frames["Red"])
+                        sock.sendto(b"43", addr)
+                        continue
+                    if target_id == 53 and team == "Green":
+                        log(f"Green base hit by player {shooter_id}")
+                        handle_score_event(shooter_id, "Green",
+                                           score_labels["Green"],
+                                           player_frames["Green"])
+                        sock.sendto(b"53", addr)
+                        continue
 
-                # normal hit
-                log(f"Player {shooter_id} hit Player {target_id}")
-                handle_score_event(shooter_id, team,
-                                   score_labels[team],
-                                   player_frames[team])
-                sock.sendto(str(target_id).encode(), addr)
+                    # normal hit
+                    log(f"Player {shooter_id} hit Player {target_id}")
+                    handle_score_event(shooter_id, team,
+                                       score_labels[team],
+                                       player_frames[team])
+                    sock.sendto(str(target_id).encode(), addr)
+                else:
+                    log(f"Received hit: {shooter_id} -> {target_id}, but GUI not active.")
+                    sock.sendto(str(target_id).encode(), addr)
 
             elif msg == "221":
                 log("Game‑over signal received.")
@@ -82,6 +86,7 @@ def run_server(score_labels=None, player_frames=None, log_event=None):
 
 if __name__ == "__main__":
     run_server()
+
 
 
 
