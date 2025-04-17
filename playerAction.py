@@ -4,7 +4,7 @@ import socket
 import config
 import threading
 import udpServer
-from randomMusic import play as play_random_music
+#from randomMusic import play as play_random_music
 
 player_scores = {}
 
@@ -120,7 +120,7 @@ def start_game(root, players=None):
     threading.Thread(target=udpServer.run_server, args=(score_labels, player_frames), daemon=True).start()
 
     # Start music
-    threading.Thread(target=play_random_music, daemon=True).start()
+    #threading.Thread(target=play_random_music, daemon=True).start()
 
     # Send 202 to traffic generator
     signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
