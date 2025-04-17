@@ -140,6 +140,8 @@ def start_game(root, players=None):
 
     # Start pre-game countdown
     #update_timer(30)
+    update_timer(360, is_game_timer=True)
+    
 
 def handle_score_event(player_id, team, score_label, players_frame):
     if player_id not in player_scores:
