@@ -107,7 +107,7 @@ def start_game(root, players=None):
             signal_sock.sendto(b"221", (config.NETWORK_ADDRESS, 7500))
         root.destroy()
 
-    end_button = tk.Button(bottom_frame, text="End Game", font=("Arial", 14), bg="#FFFF33", fg="white", command=end_game)
+    end_button = tk.Button(bottom_frame, text="End Game", font=("Arial", 14), bg="#AB7E02", fg="white", command=end_game)
     end_button.grid(row=0, column=0, padx=20, pady=10)
 
     # Timer label
