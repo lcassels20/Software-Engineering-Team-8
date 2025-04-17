@@ -245,7 +245,7 @@ def countdown_screen(callback):
     countdown_label.place(relx=0.5, rely=0.8, anchor="center")
     
     def update_count(i):
-        if i == 20:
+        if i == 17:
             threading.Thread(target=play_random_music, daemon=True).start()
         if i > 0:
             countdown_label.config(text=str(i))
