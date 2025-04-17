@@ -147,11 +147,18 @@ def launch_game_screen(root, players=None):          # preferred name
     score_labels  = {"Red": red_score,  "Green": green_score}
     player_frames = {"Red": red_list,   "Green": green_list}
 
-    threading.Thread(
-        target=udpServer.run_server,
-        args=(score_labels, player_frames, log_event),
-        daemon=True
-    ).start()
+    print("Attempting to start UDP server thread...")
+
+    try:
+        threading.Thread(
+            target=udpServer.run_server,
+            args=(score_labels, player_frames, log_event),
+            daemon=True
+        ).start()
+        print(" UDP server thread started successfully.")
+    except Exception as e:
+        print(f" Failed to start UDP server thread: {e}")
+
 
     # ─────────  send “202” start signal  ─────────
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
