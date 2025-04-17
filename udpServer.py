@@ -4,6 +4,7 @@ import config
 def run_server(score_labels=None, player_frames=None):
     from playerAction import handle_score_event, player_scores
 
+    print(">>> run_server() called")
     localIP = config.NETWORK_ADDRESS
     localPort = 7501  # Receiving port
     bufferSize = 1024
@@ -12,6 +13,7 @@ def run_server(score_labels=None, player_frames=None):
     UDPServerSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     UDPServerSocket.bind((localIP, localPort))
     print("UDP server up and listening on", localIP, ":", localPort)
+    print(">>> Waiting for messages...")
 
     while True:
         bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
