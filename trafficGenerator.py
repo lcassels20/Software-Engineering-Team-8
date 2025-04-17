@@ -1,80 +1,84 @@
 import socket
 import random
 import time
-import config  # Use shared network address
 
-bufferSize = 1024
-network_address = config.NETWORK_ADDRESS
-game_listen_port = 7501
+bufferSize  = 1024
+serverAddressPort   = ("127.0.0.1", 7500)
+clientAddressPort   = ("127.0.0.1", 7501)
 
-print("\nThis program will generate some test traffic for 2 players on the red")
-print("team as well as 2 players on the green team.\n")
 
-try:
-    red1    = str(int(input('Enter equipment ID of Red player 1 ==> ')))
-    red2    = str(int(input('Enter equipment ID of Red player 2 ==> ')))
-    green1  = str(int(input('Enter equipment ID of Green player 1 ==> ')))
-    green2  = str(int(input('Enter equipment ID of Green player 2 ==> ')))
-except ValueError:
-    print("All equipment IDs must be numeric.")
-    exit()
+print('this program will generate some test traffic for 2 players on the red ')
+print('team as well as 2 players on the green team')
+print('')
 
-# Single socket for all sending/receiving
-UDPSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-UDPSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-UDPSocket.settimeout(150)
-UDPSocket.bind((network_address, 0))  # Let OS assign port
+red1 = input('Enter equipment id of red player 1 ==> ')
+red2 = input('Enter equipment id of red player 2 ==> ')
+green1 = input('Enter equipment id of green player 1 ==> ')
+green2 = input('Enter equipment id of green player 2 ==> ')
 
-print("Traffic generator bound on:", UDPSocket.getsockname())
-print("\nWaiting for start from game_software...")
+# Create datagram sockets
+UDPServerSocketReceive = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+UDPClientSocketTransmit = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
-# Wait for 202 signal from game
-while True:
-    try:
-        data, addr = UDPSocket.recvfrom(bufferSize)
-        msg = data.decode('utf-8')
-        print("Received from game software:", msg)
-        if msg == "202":
-            break
-    except socket.timeout:
-        print("Timed out waiting for game start.")
-        exit()
+# bind server socket
+UDPServerSocketReceive.bind(serverAddressPort)
 
-print("Starting traffic simulation...")
-time.sleep(0.5)  # Let server fully initialize
+# wait for start from game software
+print ("")
+print ("waiting for start from game_software")
 
+received_data = ' '
+while received_data != '202':
+	received_data, address = UDPServerSocketReceive.recvfrom(bufferSize)
+	received_data = received_data.decode('utf-8')
+	print ("Received from game software: " + received_data)
+print ('')
+
+# create events, random player and order
 counter = 0
+
 while True:
-    redplayer = random.choice([red1, red2])
-    greenplayer = random.choice([green1, green2])
+	if random.randint(1,2) == 1:
+		redplayer = red1
+	else:
+		redplayer = red2
 
-    if random.randint(0, 1) == 0:
-        message = f"{redplayer}:{greenplayer}"
-    else:
-        message = f"{greenplayer}:{redplayer}"
+	if random.randint(1,2) == 1:
+		greenplayer = green1
+	else: 
+		greenplayer = green2	
 
-    if counter == 10:
-        message = f"{redplayer}:43"
-    if counter == 20:
-        message = f"{greenplayer}:53"
-
-    print(f"\nTransmitting to game: {message}")
-    UDPSocket.sendto(message.encode(), (network_address, game_listen_port))
-
-    try:
-        response, addr = UDPSocket.recvfrom(bufferSize)
-        print("  ↳ Response from game:", response.decode())
-    except socket.timeout:
-        print("No response. Ending simulation.")
-        break
-
-    if response.decode().strip() == "221":
-        break
-
-    counter += 1
-    time.sleep(random.randint(1, 3))
-
-print("Traffic simulation complete.")
+	if random.randint(1,2) == 1:
+		message = str(redplayer) + ":" + str(greenplayer)
+	else:
+		message = str(greenplayer) + ":" + str(redplayer)
+		
+	# after 5 iterations, send friendly fire hit
+	if counter == 5:
+		message=(str(red1) + ":" + str(red2))
+		
+	# after 10 iterations, send base hit
+	if counter == 10:
+		message = str(redplayer) + ":43"
+	if counter == 20:
+		message = str(greenplayer) + ":53"
+		
+	print("transmitting to game: " + message)
+	
+	UDPClientSocketTransmit.sendto(str.encode(str(message)), clientAddressPort)
+	# receive answer from game softare
+	
+	
+	received_data, address = UDPServerSocketReceive.recvfrom(bufferSize)
+	received_data = received_data.decode('utf-8')
+	print ("Received from game software: " + received_data)
+	print ('')
+	counter = counter + 1;
+	if received_data == '221':
+		break;
+	time.sleep(random.randint(1,3))
+	
+print("program complete")
 
 
 
