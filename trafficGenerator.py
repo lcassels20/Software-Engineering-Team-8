@@ -27,6 +27,7 @@ UDPSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 UDPSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 UDPSocket.settimeout(150)
 #UDPSocket.bind((network_address, local_receive_port))
+UDPSocket.bind((network_address, 0))  # OS chooses a free port
 
 # Wait for start signal from game software
 print("\nWaiting for start from game_software...")
