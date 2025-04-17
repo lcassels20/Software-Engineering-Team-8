@@ -24,7 +24,7 @@ green2 = input('Enter equipment id of green player 2 ==> ')
 
 # Create datagram sockets
 UDPServerSocketReceive = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-UDPServerSocketReceive.settimeout(5)  # 5 seconds timeout
+UDPServerSocketReceive.settimeout(150)  # 5 seconds timeout
 UDPClientSocketTransmit = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
 # bind server socket
