@@ -8,6 +8,8 @@ from database import (
 import udpSocket  # Transmits equipment codes after player addition
 import playerAction  # For transitioning to the player action screen
 import config  # Import network configuration
+import threading
+from randomMusic import play as play_random_music
 
 # Global lists to store players added in this session.
 red_players = []
@@ -431,10 +433,15 @@ def teamRegistration():
     green_player_container = tk.Frame(greenFrame, bd=0)
     green_player_container.place(relx=0.5, rely=0.5, anchor="center")
 
+    def start_game_with_music():
+        threading.Thread(target=play_random_music, daemon=True).start()
+        countdown_screen(lambda: playerAction.start_game(app_root, players=red_players + green_players))
+
     # Green Team Buttons
     start_game_button = tk.Button(
         greenFrame,
         text="Start Game",
+        command=start_game_with_music,
         command=lambda: countdown_screen(lambda: playerAction.start_game(app_root, players=red_players + green_players)),
         font=("Arial", 14),
         bg="#20592e", fg="#FFFF33",
