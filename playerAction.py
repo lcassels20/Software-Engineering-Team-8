@@ -117,8 +117,6 @@ def start_game(root, players=None):
 
     score_labels = {"Red": red_score_label, "Green": green_score_label}
     player_frames = {"Red": red_players_frame, "Green": green_players_frame}
-    
-    # 🆕 Pass player_scores to the server for proper updates
     threading.Thread(
         target=udpServer.run_server,
         args=(score_labels, player_frames, event_label, player_scores),
@@ -159,6 +157,7 @@ def handle_score_event(player_id, team, score_label, players_frame, event_label=
 
     for widget in players_frame.winfo_children():
         widget.destroy()
+
     for player_id, player_data in sorted(player_scores.items(), key=lambda x: -x[1]["score"]):
         if player_data["team"] == team:
             text = f"ID: {player_id} | Name: {player_data['codename']} | Score: {player_data['score']}"
@@ -175,6 +174,7 @@ if __name__ == "__main__":
     root.geometry("800x600")
     start_game(root)
     root.mainloop()
+
 
 
 
