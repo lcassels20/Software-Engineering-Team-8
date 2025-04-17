@@ -18,14 +18,15 @@ def run_server(score_labels=None, player_frames=None):
         message = bytesAddressPair[0].decode()
         address = bytesAddressPair[1]
 
-        print("UDP Server received message:", message)
+        print("\nUDP Server received message:", message)
         print("Current player_scores keys:", list(player_scores.keys()))
 
         if ":" in message and score_labels and player_frames:
-            shooter_str, target_str = message.split(":")
             try:
+                shooter_str, target_str = message.split(":")
                 shooter_id = int(shooter_str)
                 target_id = int(target_str)
+                print(f"Parsed shooter_id: {shooter_id}, target_id: {target_id}")
             except ValueError:
                 print("Invalid IDs in message:", message)
                 UDPServerSocket.sendto(b"INVALID", address)
@@ -42,22 +43,22 @@ def run_server(score_labels=None, player_frames=None):
                 )
 
                 # Send back the equipment ID of the player who got hit
+                print(f"Sending hit acknowledgment: {target_id}")
                 UDPServerSocket.sendto(str(target_id).encode(), address)
-                continue
             else:
-                print("Shooter ID not found in player_scores:", shooter_id)
+                print(f"Shooter ID {shooter_id} not found in player_scores.")
                 UDPServerSocket.sendto(b"UNKNOWN SHOOTER", address)
-                continue
-                
+
         elif message.strip() == "221":
-            # Game over signal — send 221 reply
+            print("Game over signal received. Sending '221'")
             UDPServerSocket.sendto(b"221", address)
         else:
-            # Default reply if no specific action
+            print(f"Message '{message.strip()}' not understood. Sending default reply 'OK'")
             UDPServerSocket.sendto(b"OK", address)
 
 if __name__ == "__main__":
     run_server()
+
 
 
 
