@@ -1,13 +1,19 @@
-import socket, config
+import socket
+import config
 
 def run_server(score_labels=None, player_frames=None, log_event=None):
     try:
         from playerAction import handle_score_event, player_scores
 
+        print("🔥 run_server() thread started")
+
         def log(line: str):
-            print(line)
-            if log_event:
-                log_event(line)
+            try:
+                print(line)
+                if log_event:
+                    log_event(line)
+            except Exception as e:
+                print(f"[log() ERROR] Could not log line: {line}\nException: {e}")
 
         localIP = config.NETWORK_ADDRESS
         localPort = 7501
@@ -33,7 +39,7 @@ def run_server(score_labels=None, player_frames=None, log_event=None):
                 try:
                     shooter_str, target_str = msg.split(":")
                     shooter_id = int(shooter_str)
-                    target_id  = int(target_str)
+                    target_id = int(target_str)
                 except ValueError:
                     log("Malformed message: could not parse shooter/target")
                     sock.sendto(b"INVALID", addr)
@@ -47,7 +53,6 @@ def run_server(score_labels=None, player_frames=None, log_event=None):
                 if score_labels and player_frames:
                     team = player_scores[shooter_id]["team"]
 
-                    # base hits
                     if target_id == 43 and team == "Red":
                         log(f"Red base hit by player {shooter_id}")
                         handle_score_event(shooter_id, "Red",
@@ -55,6 +60,7 @@ def run_server(score_labels=None, player_frames=None, log_event=None):
                                            player_frames["Red"])
                         sock.sendto(b"43", addr)
                         continue
+
                     if target_id == 53 and team == "Green":
                         log(f"Green base hit by player {shooter_id}")
                         handle_score_event(shooter_id, "Green",
@@ -63,7 +69,6 @@ def run_server(score_labels=None, player_frames=None, log_event=None):
                         sock.sendto(b"53", addr)
                         continue
 
-                    # normal hit
                     log(f"Player {shooter_id} hit Player {target_id}")
                     handle_score_event(shooter_id, team,
                                        score_labels[team],
@@ -74,7 +79,7 @@ def run_server(score_labels=None, player_frames=None, log_event=None):
                     sock.sendto(str(target_id).encode(), addr)
 
             elif msg == "221":
-                log("Game‑over signal received.")
+                log("Game-over signal received.")
                 sock.sendto(b"221", addr)
             else:
                 log(f"Unrecognized message format: {msg}")
@@ -86,6 +91,7 @@ def run_server(score_labels=None, player_frames=None, log_event=None):
 
 if __name__ == "__main__":
     run_server()
+
 
 
 
