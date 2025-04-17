@@ -148,24 +148,24 @@ def handle_score_event(player_id, team, score_label, players_frame, event_label=
         print(f"Player ID {player_id} not found.")
         return
 
-    player_scores[player_id]["score"] += 100
-    if not player_scores[player_id]["codename"].startswith("B "):
-        player_scores[player_id]["codename"] = f"B {player_scores[player_id]['codename']}"
+    player_scores_ref[player_id]["score"] += 100
+    if not player_scores_ref[player_id]["codename"].startswith("B "):
+        player_scores_ref[player_id]["codename"] = f"B {player_scores_ref[player_id]['codename']}"
 
-    total_score = sum(player["score"] for player in player_scores.values() if player["team"] == team)
+    total_score = sum(player["score"] for player in player_scores_ref.values() if player["team"] == team)
     score_label.config(text=f"Score: {total_score}")
 
     for widget in players_frame.winfo_children():
         widget.destroy()
 
-    for player_id, player_data in sorted(player_scores.items(), key=lambda x: -x[1]["score"]):
-        if player_data["team"] == team:
-            text = f"ID: {player_id} | Name: {player_data['codename']} | Score: {player_data['score']}"
+    for pid, pdata in sorted(player_scores_ref.items(), key=lambda x: -x[1]["score"]):
+        if pdata["team"] == team:
+            text = f"ID: {pid} | Name: {pdata['codename']} | Score: {pdata['score']}"
             label = tk.Label(players_frame, text=text, bg=players_frame["bg"], fg="#FFFF33", font=("Arial", 12))
             label.pack(anchor="w", pady=2)
 
     if event_label:
-        codename = player_scores[player_id]["codename"]
+        codename = player_scores_ref[player_id]["codename"]
         event_label.config(text=f"{codename} scored!")
 
 if __name__ == "__main__":
@@ -174,6 +174,7 @@ if __name__ == "__main__":
     root.geometry("800x600")
     start_game(root)
     root.mainloop()
+
 
 
 
