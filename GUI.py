@@ -385,69 +385,40 @@ def teamRegistration():
     
     red_player_container = tk.Frame(redFrame, bd=0)
     red_player_container.place(relx=0.5, rely=0.5, anchor="center")
-    
-    # Create a Button sized to the PNG image for "Add Player"
-    try:
-        add_red_img_pil = Image.open("addPlayer.png").convert("RGBA")
-        add_red_img = ImageTk.PhotoImage(add_red_img_pil)
-    except Exception as e:
-        print("Error loading addPlayer.png:", e)
-        add_red_img = None
 
+    # Red Team Buttons
     add_red_button = tk.Button(
         redFrame,
-        image=add_red_img,
+        text="Add Player",
         command=lambda: popup_add_player("Red", red_player_container),
-        borderwidth=0,
-        highlightthickness=0,
-        relief=tk.FLAT,
-        width=add_red_img.width(),
-        height=add_red_img.height()
+        font=("Arial", 14),
+        bg="#592020", fg="#FFFF33",
+        activebackground="#592020", activeforeground="#FFFF33",
+        relief=tk.FLAT
     )
     add_red_button.place(relx=0.2, rely=0.9, anchor="center")
-    add_red_button.image = add_red_img
-
-    # "Submit Players" button for Red
-    try:
-        submitRed_img_pil = Image.open("submitPlayers.png").convert("RGBA")
-        submitRed_img = ImageTk.PhotoImage(submitRed_img_pil)
-    except Exception as e:
-        print("Error loading submitPlayers.png:", e)
-        submitRed_img = None
 
     submit_red_button = tk.Button(
         redFrame,
-        image=submitRed_img,
+        text="Submit Players",
         command=lambda: print("Red team submission (players stored in session)"),
-        borderwidth=0,
-        highlightthickness=0,
-        relief=tk.FLAT,
-        width=submitRed_img.width(),
-        height=submitRed_img.height()
+        font=("Arial", 14),
+        bg="#592020", fg="#FFFF33",
+        activebackground="#592020", activeforeground="#FFFF33",
+        relief=tk.FLAT
     )
     submit_red_button.place(relx=0.5, rely=0.9, anchor="center")
-    submit_red_button.image = submitRed_img
-
-    # "Clear All" button for Red
-    try:
-        clear_all_img_pil = Image.open("clearEntries.png").convert("RGBA")
-        clear_all_img = ImageTk.PhotoImage(clear_all_img_pil)
-    except Exception as e:
-        print("Error loading clearEntries.png:", e)
-        clear_all_img = None
 
     clear_all_button = tk.Button(
         redFrame,
-        image=clear_all_img,
-        command=lambda: clear_all_entries(red_player_container, green_player_container),
-        borderwidth=0,
-        highlightthickness=0,
-        relief=tk.FLAT,
-        width=clear_all_img.width(),
-        height=clear_all_img.height()
+        text="Clear All",
+        command=lambda: clear_all_entries(red_player_container, None),
+        font=("Arial", 14),
+        bg="#592020", fg="#FFFF33",
+        activebackground="#592020", activeforeground="#FFFF33",
+        relief=tk.FLAT
     )
     clear_all_button.place(relx=0.8, rely=0.9, anchor="center")
-    clear_all_button.image = clear_all_img
 
     # ------------------ GREEN TEAM (Right) ------------------
     greenFrame = tk.Frame(content_frame, highlightthickness=2, highlightbackground="#FFFF33")
@@ -460,69 +431,39 @@ def teamRegistration():
     green_player_container = tk.Frame(greenFrame, bd=0)
     green_player_container.place(relx=0.5, rely=0.5, anchor="center")
 
-    # "Start Game" button for Green
-    try:
-        start_img_pil = Image.open("startGame.png").convert("RGBA")
-        start_img = ImageTk.PhotoImage(start_img_pil)
-    except Exception as e:
-        print("Error loading startGame.png:", e)
-        start_img = None
-
+    # Green Team Buttons
     start_game_button = tk.Button(
         greenFrame,
-        image=start_img,
-        # Instead of directly starting the game, call countdown_screen first.
+        text="Start Game",
         command=lambda: countdown_screen(lambda: playerAction.start_game(app_root, players=red_players + green_players)),
-        borderwidth=0,
-        highlightthickness=0,
-        relief=tk.FLAT,
-        width=start_img.width(),
-        height=start_img.height()
+        font=("Arial", 14),
+        bg="#20592e", fg="#FFFF33",
+        activebackground="#20592e", activeforeground="#FFFF33",
+        relief=tk.FLAT
     )
     start_game_button.place(relx=0.2, rely=0.9, anchor="center")
-    start_game_button.image = start_img
-
-    # "Submit Players" button for Green
-    try:
-        submitGreen_img_pil = Image.open("submitPlayers.png").convert("RGBA")
-        submitGreen_img = ImageTk.PhotoImage(submitGreen_img_pil)
-    except Exception as e:
-        print("Error loading submitPlayers.png:", e)
-        submitGreen_img = None
 
     submit_green_button = tk.Button(
         greenFrame,
-        image=submitGreen_img,
+        text="Submit Players",
         command=lambda: print("Green team submission (players stored in session)"),
-        borderwidth=0,
-        highlightthickness=0,
-        relief=tk.FLAT,
-        width=submitGreen_img.width(),
-        height=submitGreen_img.height()
+        font=("Arial", 14),
+        bg="#20592e", fg="#FFFF33",
+        activebackground="#20592e", activeforeground="#FFFF33",
+        relief=tk.FLAT
     )
     submit_green_button.place(relx=0.5, rely=0.9, anchor="center")
-    submit_green_button.image = submitGreen_img
-
-    # "Add Player" button for Green
-    try:
-        add_green_img_pil = Image.open("addPlayer.png").convert("RGBA")
-        add_green_img = ImageTk.PhotoImage(add_green_img_pil)
-    except Exception as e:
-        print("Error loading addPlayer.png:", e)
-        add_green_img = None
 
     add_green_button = tk.Button(
         greenFrame,
-        image=add_green_img,
+        text="Add Player",
         command=lambda: popup_add_player("Green", green_player_container),
-        borderwidth=0,
-        highlightthickness=0,
-        relief=tk.FLAT,
-        width=add_green_img.width(),
-        height=add_green_img.height()
+        font=("Arial", 14),
+        bg="#20592e", fg="#FFFF33",
+        activebackground="#20592e", activeforeground="#FFFF33",
+        relief=tk.FLAT
     )
     add_green_button.place(relx=0.8, rely=0.9, anchor="center")
-    add_green_button.image = add_green_img
 
 
 
