@@ -26,7 +26,7 @@ green2 = input('Enter equipment ID of Green player 2 ==> ')
 UDPSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 UDPSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 UDPSocket.settimeout(150)
-UDPSocket.bind((network_address, local_receive_port))
+#UDPSocket.bind((network_address, local_receive_port))
 
 # Wait for start signal from game software
 print("\nWaiting for start from game_software...")
