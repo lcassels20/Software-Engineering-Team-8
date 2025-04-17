@@ -28,6 +28,16 @@ def run_server(score_labels=None, player_frames=None):
                 shooter_str, target_str = message.split(":")
                 shooter_id = int(shooter_str)
                 target_id = int(target_str)
+                if target_id == 43 and player_scores[shooter_id]["team"] == "Red":
+                    print(f"Red player {shooter_id} scored on Green base!")
+                    handle_score_event(shooter_id, "Red", score_labels["Red"], player_frames["Red"])
+                    UDPServerSocket.sendto(b"43", address)
+                    continue
+                elif target_id == 53 and player_scores[shooter_id]["team"] == "Green":
+                    print(f"Green player {shooter_id} scored on Red base!")
+                    handle_score_event(shooter_id, "Green", score_labels["Green"], player_frames["Green"])
+                    UDPServerSocket.sendto(b"53", address)
+                    continue
                 print(f"Parsed shooter_id: {shooter_id}, target_id: {target_id}")
             except ValueError:
                 print("Invalid IDs in message:", message)
