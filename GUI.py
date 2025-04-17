@@ -245,6 +245,8 @@ def countdown_screen(callback):
     countdown_label.place(relx=0.5, rely=0.8, anchor="center")
     
     def update_count(i):
+        if i == 9:
+            threading.Thread(target=play_random_music, daemon=True).start(
         if i > 0:
             countdown_label.config(text=str(i))
             countdown_frame.after(1000, update_count, i-1)
@@ -434,7 +436,7 @@ def teamRegistration():
     green_player_container.place(relx=0.5, rely=0.5, anchor="center")
 
     def start_game_with_music():
-        threading.Thread(target=play_random_music, daemon=True).start()
+        #threading.Thread(target=play_random_music, daemon=True).start()
         countdown_screen(lambda: playerAction.start_game(app_root, players=red_players + green_players))
 
     # Green Team Buttons
