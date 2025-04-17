@@ -442,7 +442,7 @@ def teamRegistration():
         greenFrame,
         text="Start Game",
         command=start_game_with_music,
-        command=lambda: countdown_screen(lambda: playerAction.start_game(app_root, players=red_players + green_players)),
+        #command=lambda: countdown_screen(lambda: playerAction.start_game(app_root, players=red_players + green_players)),
         font=("Arial", 14),
         bg="#20592e", fg="#FFFF33",
         activebackground="#20592e", activeforeground="#FFFF33",
