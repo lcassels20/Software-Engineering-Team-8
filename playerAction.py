@@ -1,179 +1,191 @@
 import tkinter as tk
 from database import get_connection
-import socket
+import socket, threading, queue
 import config
-import threading
 import udpServer
 
 player_scores = {}
 
+# ---------- helper ---------------------------------------------------------
 def fetch_players():
     conn = get_connection()
     if not conn:
         return []
-    cursor = conn.cursor()
-    cursor.execute("SELECT player_id, name, equipment_id, team FROM players ORDER BY id")
-    players = cursor.fetchall()
-    cursor.close()
-    conn.close()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT player_id, name, equipment_id, team FROM players ORDER BY id"
+    )
+    players = cur.fetchall()
+    cur.close(); conn.close()
     return players
 
 def create_scrollable_frame(parent, height):
     canvas = tk.Canvas(parent, bg=parent["bg"], highlightthickness=0, height=height)
-    scrollbar = tk.Scrollbar(parent, orient="vertical", command=canvas.yview)
-    scroll_frame = tk.Frame(canvas, bg=parent["bg"])
-    scroll_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
-    canvas.create_window((0, 0), window=scroll_frame, anchor="nw")
-    canvas.configure(yscrollcommand=scrollbar.set)
+    vsb   = tk.Scrollbar(parent, orient="vertical", command=canvas.yview)
+    frame = tk.Frame(canvas, bg=parent["bg"])
+
+    frame.bind("<Configure>",
+               lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+    canvas.create_window((0, 0), window=frame, anchor="nw")
+    canvas.configure(yscrollcommand=vsb.set)
+
     canvas.pack(side="left", fill="both", expand=True)
-    scrollbar.pack(side="right", fill="y")
-    return scroll_frame
+    vsb.pack(side="right", fill="y")
+    return frame
+# ---------------------------------------------------------------------------
 
 def start_game(root, players=None):
     global player_scores
-
-    for widget in root.winfo_children():
-        widget.destroy()
+    for w in root.winfo_children():
+        w.destroy()
 
     if players is None:
         players = fetch_players()
 
-    player_scores = {}
-    for player in players:
-        try:
-            equipment_id = int(player[2])
-            player_scores[equipment_id] = {
-                "codename": player[1],
-                "score": 0,
-                "team": player[3]
-            }
-        except:
-            continue
+    # -----------------------------------------------------------------------
+    #  BUILD THE GAME LAYOUT
+    # -----------------------------------------------------------------------
+    player_scores = {int(p[2]): {"codename": p[1], "score": 0, "team": p[3]}
+                     for p in players if str(p[2]).isdigit()}
 
-    red_team = [player for player in players if player[3] == "Red"]
-    green_team = [player for player in players if player[3] == "Green"]
+    red_team   = [p for p in players if p[3] == "Red"]
+    green_team = [p for p in players if p[3] == "Green"]
 
     root.grid_rowconfigure(0, weight=1)
     root.grid_rowconfigure(1, weight=0)
     root.grid_columnconfigure(0, weight=1)
     root.grid_columnconfigure(1, weight=1)
 
-    red_frame = tk.Frame(root, bg="#592020", highlightthickness=2, highlightbackground="#FFFF33")
-    red_frame.grid(row=0, column=0, sticky="nsew")
-    green_frame = tk.Frame(root, bg="#20592e", highlightthickness=2, highlightbackground="#FFFF33")
-    green_frame.grid(row=0, column=1, sticky="nsew")
+    # -- TEAM PANELS --------------------------------------------------------
+    def make_team_panel(parent, bg, logo_file, team_players):
+        frame = tk.Frame(parent, bg=bg, highlightthickness=2,
+                         highlightbackground="#FFFF33")
+        score_lbl = tk.Label(frame, text="Score: 0", bg=bg, fg="#FFFF33",
+                             font=("Arial", 16))
+        score_lbl.pack(pady=5)
 
-    red_score_label = tk.Label(red_frame, text="Score: 0", bg="#592020", fg="#FFFF33", font=("Arial", 16))
-    red_score_label.pack(pady=5)
+        logo = tk.PhotoImage(file=logo_file)
+        tk.Label(frame, image=logo, bg=bg).pack(pady=10)
+        frame.logo = logo  # keep ref
 
-    red_logo = tk.PhotoImage(file="redTeam.png")
-    red_title = tk.Label(red_frame, image=red_logo, bg="#592020")
-    red_title.image = red_logo
-    red_title.pack(pady=10)
+        players_fr = create_scrollable_frame(frame, 250)
+        for p in team_players:
+            tk.Label(players_fr,
+                     text=f"ID: {p[0]} | Name: {p[1]} | Equipment: {p[2]}",
+                     bg=bg, fg="#FFFF33", font=("Arial", 12)
+                     ).pack(anchor="w", pady=2)
+        return frame, score_lbl, players_fr
 
-    red_players_frame = create_scrollable_frame(red_frame, height=250)
-    for player in red_team:
-        text = f"ID: {player[0]} | Name: {player[1]} | Equipment: {player[2]}"
-        label = tk.Label(red_players_frame, text=text, bg="#592020", fg="#FFFF33", font=("Arial", 12))
-        label.pack(anchor="w", pady=2)
+    red_fr , red_score , red_players  = make_team_panel(root, "#592020",
+                                                        "redTeam.png",  red_team)
+    green_fr, green_score, green_players = make_team_panel(root, "#20592e",
+                                                           "greenTeam.png", green_team)
+    red_fr.grid(row=0, column=0, sticky="nsew")
+    green_fr.grid(row=0, column=1, sticky="nsew")
 
-    green_score_label = tk.Label(green_frame, text="Score: 0", bg="#20592e", fg="#FFFF33", font=("Arial", 16))
-    green_score_label.pack(pady=5)
-
-    green_logo = tk.PhotoImage(file="greenTeam.png")
-    green_title = tk.Label(green_frame, image=green_logo, bg="#20592e")
-    green_title.image = green_logo
-    green_title.pack(pady=10)
-
-    green_players_frame = create_scrollable_frame(green_frame, height=250)
-    for player in green_team:
-        text = f"ID: {player[0]} | Name: {player[1]} | Equipment: {player[2]}"
-        label = tk.Label(green_players_frame, text=text, bg="#20592e", fg="#FFFF33", font=("Arial", 12))
-        label.pack(anchor="w", pady=2)
-
-    bottom_frame = tk.Frame(root, bg="#AB7E02")
-    bottom_frame.grid(row=1, column=0, columnspan=2, sticky="ew")
-    bottom_frame.grid_columnconfigure(0, weight=1)
-    bottom_frame.grid_columnconfigure(1, weight=1)
+    # -- BOTTOM BAR ---------------------------------------------------------
+    bottom = tk.Frame(root, bg="#AB7E02")
+    bottom.grid(row=1, column=0, columnspan=2, sticky="ew")
+    bottom.grid_columnconfigure(0, weight=0)
+    bottom.grid_columnconfigure(1, weight=1)
 
     def end_game():
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         for _ in range(3):
-            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sock.sendto(b"221", (config.NETWORK_ADDRESS, 7500))
         root.destroy()
 
-    end_button = tk.Button(bottom_frame, text="End Game", font=("Arial", 14), bg="#AB7E02", fg="white", command=end_game)
-    end_button.grid(row=0, column=0, padx=20, pady=10)
+    tk.Button(bottom, text="End Game", font=("Arial", 14),
+              bg="#AB7E02", fg="white", command=end_game
+              ).grid(row=0, column=0, padx=20, pady=10)
 
-    log_text = tk.Text(bottom_frame, height=4, width=60, font=("Arial", 10), bg="#FFFFE0", state="disabled")
-    log_text.grid(row=0, column=1, padx=10, sticky="ew")
+    # ---------- LOG AREA (read‑only) --------------------------------------
+    log_box = tk.Text(bottom, height=4, bg="#FFFFE0",
+                      font=("Arial", 10), state="disabled", wrap="none")
+    log_box.grid(row=0, column=1, sticky="ew", padx=10)
 
-    timer_label = tk.Label(bottom_frame, text="", font=("Arial", 24), fg="black", bg="#AB7E02")
-    timer_label.grid(row=1, column=1, pady=5)
+    timer_lbl = tk.Label(bottom, font=("Arial", 24),
+                         fg="black", bg="#AB7E02")
+    timer_lbl.grid(row=1, column=1, pady=5)
 
-    def log_event(text):
-        log_text.config(state="normal")
-        log_text.insert("end", text + "\n")
-        log_text.config(state="disabled")
-        log_text.see("end")
+    # -----------------------------------------------------------------------
+    #  THREAD‑SAFE LOGGING
+    # -----------------------------------------------------------------------
+    log_q = queue.Queue()
 
-    score_labels = {"Red": red_score_label, "Green": green_score_label}
-    player_frames = {"Red": red_players_frame, "Green": green_players_frame}
+    def add_to_log(msg):
+        log_box.config(state="normal")
+        log_box.insert("end", msg + "\n")
+        log_box.config(state="disabled")
+        log_box.see("end")
 
-    threading.Thread(
-        target=udpServer.run_server,
-        args=(score_labels, player_frames, log_event),
-        daemon=True
-    ).start()
+    def poll_log_queue():
+        while not log_q.empty():
+            add_to_log(log_q.get())
+        root.after(100, poll_log_queue)   # keep polling
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    sock.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
+    poll_log_queue()  # start the polling loop
+
+    # this function is passed to the UDP thread -----------------------------
+    def log_event(msg):
+        log_q.put(msg)
+
+    # -----------------------------------------------------------------------
+    score_labels  = {"Red": red_score,  "Green": green_score}
+    player_frames = {"Red": red_players, "Green": green_players}
+
+    threading.Thread(target=udpServer.run_server,
+                     args=(score_labels, player_frames, log_event),
+                     daemon=True).start()
+
+    # kick the traffic generator
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
     print("Sent '202' to traffic generator")
 
-    def update_timer(seconds):
-        if seconds > 0:
-            mins, secs = divmod(seconds, 60)
-            timer_label.config(text=f"{mins:02d}:{secs:02d}")
-            root.after(1000, update_timer, seconds - 1)
+    # -----------------------------------------------------------------------
+    def update_timer(sec):
+        if sec > 0:
+            mins, secs = divmod(sec, 60)
+            timer_lbl.config(text=f"{mins:02d}:{secs:02d}")
+            root.after(1000, update_timer, sec-1)
         else:
-            timer_label.config(text="Game Over")
-            print("Game Over")
-            for _ in range(3):
-                sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                sock.sendto(b"221", (config.NETWORK_ADDRESS, 7500))
-
+            timer_lbl.config(text="Game Over")
     update_timer(360)
 
-def handle_score_event(player_id, team, score_label, players_frame):
+# ---------------------------------------------------------------------------
+def handle_score_event(player_id, team, score_lbl, players_fr):
     if player_id not in player_scores:
-        print(f"Player ID {player_id} not found.")
         return
+    p = player_scores[player_id]
+    p["score"] += 100
+    if not p["codename"].startswith("B "):
+        p["codename"] = "B " + p["codename"]
 
-    player_scores[player_id]["score"] += 100
-    if not player_scores[player_id]["codename"].startswith("B "):
-        player_scores[player_id]["codename"] = f"B {player_scores[player_id]['codename']}"
+    score_lbl.config(text=f"Score: {sum(
+        pp['score'] for pp in player_scores.values() if pp['team']==team)}")
 
-    total_score = sum(p["score"] for p in player_scores.values() if p["team"] == team)
-    score_label.config(text=f"Score: {total_score}")
-
-    for widget in players_frame.winfo_children():
-        widget.destroy()
-
-    for pid, pdata in sorted(player_scores.items(), key=lambda x: -x[1]["score"]):
+    for w in players_fr.winfo_children(): w.destroy()
+    for pid, pdata in sorted(player_scores.items(),
+                             key=lambda x: -x[1]["score"]):
         if pdata["team"] == team:
-            text = f"ID: {pid} | Name: {pdata['codename']} | Score: {pdata['score']}"
-            label = tk.Label(players_frame, text=text, bg=players_frame["bg"], fg="#FFFF33", font=("Arial", 12))
-            label.pack(anchor="w", pady=2)
+            tk.Label(players_fr,
+                     text=f"ID: {pid} | Name: {pdata['codename']} | "
+                          f"Score: {pdata['score']}",
+                     bg=players_fr["bg"], fg="#FFFF33",
+                     font=("Arial", 12)
+                     ).pack(anchor="w", pady=2)
 
+# ---------------------------------------------------------------------------
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("Player Actions")
     root.geometry("800x600")
     start_game(root)
     root.mainloop()
+
 
 
 
