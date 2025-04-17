@@ -36,12 +36,13 @@ print ("waiting for start from game_software")
 
 received_data = ' '
 while received_data != '202':
-	received_data, address = UDPServerSocketReceive.recvfrom(bufferSize)
-	received_data = received_data.decode('utf-8')
-	print ("Received from game software: " + received_data)
-except socket.timeout:
-	print("No response from game software (timed out).")
-	break
+	try:
+		received_data, address = UDPServerSocketReceive.recvfrom(bufferSize)
+		received_data = received_data.decode('utf-8')
+		print ("Received from game software: " + received_data)
+	except socket.timeout:
+		print("No response from game software (timed out).")
+		break
 print ('')
 
 # create events, random player and order
