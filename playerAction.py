@@ -143,8 +143,8 @@ def start_game(root, players=None):
 
     update_timer(360)
 
-def handle_score_event(player_id, team, score_label, players_frame, event_label=None):
-    if player_id not in player_scores:
+def handle_score_event(player_id, team, score_label, players_frame, event_label=None, player_scores_ref=None):
+    if player_scores_ref is None or player_id not in player_scores_ref:
         print(f"Player ID {player_id} not found.")
         return
 
