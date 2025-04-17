@@ -9,6 +9,7 @@ def run_server(score_labels=None, player_frames=None):
     bufferSize = 1024
 
     UDPServerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    UDPServerSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     UDPServerSocket.bind((localIP, localPort))
     print("UDP server up and listening on", localIP, ":", localPort)
 
