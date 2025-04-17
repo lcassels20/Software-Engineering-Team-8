@@ -4,6 +4,7 @@ import socket
 import config
 import threading
 import udpServer
+from randomMusic import play as play_random_music
 
 player_scores = {}
 
@@ -72,11 +73,10 @@ def start_game(root, players=None):
     red_title.pack(pady=10)
 
     red_players_frame = create_scrollable_frame(red_frame, height=250)
-    if red_team:
-        for player in red_team:
-            text = f"ID: {player[0]} | Name: {player[1]} | Equipment: {player[2]}"
-            label = tk.Label(red_players_frame, text=text, bg="#592020", fg="#FFFF33", font=("Arial", 12))
-            label.pack(anchor="w", pady=2)
+    for player in red_team:
+        text = f"ID: {player[0]} | Name: {player[1]} | Equipment: {player[2]}"
+        label = tk.Label(red_players_frame, text=text, bg="#592020", fg="#FFFF33", font=("Arial", 12))
+        label.pack(anchor="w", pady=2)
 
     green_score_label = tk.Label(green_frame, text="Score: 0", bg="#20592e", fg="#FFFF33", font=("Arial", 16))
     green_score_label.pack(pady=5)
@@ -87,45 +87,38 @@ def start_game(root, players=None):
     green_title.pack(pady=10)
 
     green_players_frame = create_scrollable_frame(green_frame, height=250)
-    if green_team:
-        for player in green_team:
-            text = f"ID: {player[0]} | Name: {player[1]} | Equipment: {player[2]}"
-            label = tk.Label(green_players_frame, text=text, bg="#20592e", fg="#FFFF33", font=("Arial", 12))
-            label.pack(anchor="w", pady=2)
+    for player in green_team:
+        text = f"ID: {player[0]} | Name: {player[1]} | Equipment: {player[2]}"
+        label = tk.Label(green_players_frame, text=text, bg="#20592e", fg="#FFFF33", font=("Arial", 12))
+        label.pack(anchor="w", pady=2)
 
     bottom_frame = tk.Frame(root, bg="#AB7E02")
     bottom_frame.grid(row=1, column=0, columnspan=2, sticky="ew")
     bottom_frame.grid_columnconfigure(0, weight=1)
     bottom_frame.grid_columnconfigure(1, weight=1)
-    bottom_frame.grid_columnconfigure(2, weight=1)
 
     def end_game():
         for _ in range(3):
-            signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            signal_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            signal_sock.sendto(b"221", (config.NETWORK_ADDRESS, 7500))
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.sendto(b"221", (config.NETWORK_ADDRESS, 7500))
         root.destroy()
 
     end_button = tk.Button(bottom_frame, text="End Game", font=("Arial", 14), bg="#AB7E02", fg="white", command=end_game)
     end_button.grid(row=0, column=0, padx=20, pady=10)
 
-    event_label = tk.Label(bottom_frame, text="Recent Event", font=("Arial", 14), fg="black", bg="#AB7E02")
-    event_label.grid(row=0, column=1, padx=10, pady=10)
-
     timer_label = tk.Label(bottom_frame, text="", font=("Arial", 24), fg="black", bg="#AB7E02")
-    timer_label.grid(row=0, column=2, pady=10)
+    timer_label.grid(row=0, column=1, pady=10)
 
     score_labels = {"Red": red_score_label, "Green": green_score_label}
     player_frames = {"Red": red_players_frame, "Green": green_players_frame}
-    threading.Thread(
-        target=udpServer.run_server,
-        args=(score_labels, player_frames, event_label, player_scores),
-        daemon=True
-    ).start()
 
-    signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    signal_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    signal_sock.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
+    threading.Thread(target=udpServer.run_server, args=(score_labels, player_frames), daemon=True).start()
+    threading.Thread(target=play_random_music, daemon=True).start()
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
     print("Sent '202' to traffic generator")
 
     def update_timer(seconds):
@@ -137,36 +130,32 @@ def start_game(root, players=None):
             timer_label.config(text="Game Over")
             print("Game Over")
             for _ in range(3):
-                signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                signal_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                signal_sock.sendto(b"221", (config.NETWORK_ADDRESS, 7500))
+                sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                sock.sendto(b"221", (config.NETWORK_ADDRESS, 7500))
 
     update_timer(360)
 
-def handle_score_event(player_id, team, score_label, players_frame, event_label=None, player_scores_ref=None):
-    if player_scores_ref is None or player_id not in player_scores_ref:
+def handle_score_event(player_id, team, score_label, players_frame):
+    if player_id not in player_scores:
         print(f"Player ID {player_id} not found.")
         return
 
-    player_scores_ref[player_id]["score"] += 100
-    if not player_scores_ref[player_id]["codename"].startswith("B "):
-        player_scores_ref[player_id]["codename"] = f"B {player_scores_ref[player_id]['codename']}"
+    player_scores[player_id]["score"] += 100
+    if not player_scores[player_id]["codename"].startswith("B "):
+        player_scores[player_id]["codename"] = f"B {player_scores[player_id]['codename']}"
 
-    total_score = sum(player["score"] for player in player_scores_ref.values() if player["team"] == team)
+    total_score = sum(p["score"] for p in player_scores.values() if p["team"] == team)
     score_label.config(text=f"Score: {total_score}")
 
     for widget in players_frame.winfo_children():
         widget.destroy()
 
-    for pid, pdata in sorted(player_scores_ref.items(), key=lambda x: -x[1]["score"]):
+    for pid, pdata in sorted(player_scores.items(), key=lambda x: -x[1]["score"]):
         if pdata["team"] == team:
             text = f"ID: {pid} | Name: {pdata['codename']} | Score: {pdata['score']}"
             label = tk.Label(players_frame, text=text, bg=players_frame["bg"], fg="#FFFF33", font=("Arial", 12))
             label.pack(anchor="w", pady=2)
-
-    if event_label:
-        codename = player_scores_ref[player_id]["codename"]
-        event_label.config(text=f"{codename} scored!")
 
 if __name__ == "__main__":
     root = tk.Tk()
@@ -174,6 +163,7 @@ if __name__ == "__main__":
     root.geometry("800x600")
     start_game(root)
     root.mainloop()
+
 
 
 
