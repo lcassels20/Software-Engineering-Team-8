@@ -1,6 +1,6 @@
-from pydub import AudioSegment
-from pydub.playback import _play_with_simpleaudio
+import pygame
 import random
+import time
 
 tracks = [
     "Track01.mp3",
@@ -18,11 +18,17 @@ def play():
     print(f"Now playing: {selected_track}")
 
     try:
-        audio = AudioSegment.from_file(selected_track)
-        play_obj = _play_with_simpleaudio(audio)
-        play_obj.wait_done()
+        pygame.mixer.init()
+        pygame.mixer.music.load(selected_track)
+        pygame.mixer.music.play()
+
+        # You can either wait for it to finish here, or let it play in background
+        while pygame.mixer.music.get_busy():
+            time.sleep(0.5)
+
     except Exception as e:
         print(f"Failed to play {selected_track}: {e}")
+
 
 
 
