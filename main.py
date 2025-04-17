@@ -19,12 +19,23 @@ def main():
     root.bind("<Escape>", lambda e: root.attributes("-fullscreen", False))
 
     def on_closing():
+        # Cancel splash screen delay if still scheduled
         if hasattr(root, "splash_after_id"):
             try:
                 root.after_cancel(root.splash_after_id)
+                print("Splash screen timer cancelled.")
             except Exception as e:
                 print("Error cancelling splash_after_id:", e)
+
+        # Cancel any additional tracked after() timers
+        for aid in after_ids:
+            try:
+                root.after_cancel(aid)
+            except Exception as e:
+                print(f"Failed to cancel timer {aid}:", e)
+
         root.destroy()
+
     root.protocol("WM_DELETE_WINDOW", on_closing)
 
     def after_splash():
