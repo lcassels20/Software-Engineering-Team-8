@@ -82,7 +82,6 @@ def start_game(root, players=None):
     else:
         tk.Label(red_players_frame, text="No players found", bg="#592020", fg="#FFFF33", font=("Arial", 12)).pack(pady=10)
 
-
     green_score_label = tk.Label(green_frame, text="Score: 0", bg="#20592e", fg="#FFFF33", font=("Arial", 16))
     green_score_label.pack(pady=5)
 
@@ -101,13 +100,11 @@ def start_game(root, players=None):
     else:
         tk.Label(green_players_frame, text="No players found", bg="#20592e", fg="#FFFF33", font=("Arial", 12)).pack(pady=10)
 
-
     bottom_frame = tk.Frame(root, bg="#AB7E02")
     bottom_frame.grid(row=1, column=0, columnspan=2, sticky="ew")
     timer_label = tk.Label(bottom_frame, text="", font=("Arial", 24), fg="black", bg="#AB7E02")
     timer_label.pack(pady=10)
 
-    # Launch UDP server *before* the countdown
     score_labels = {"Red": red_score_label, "Green": green_score_label}
     player_frames = {"Red": red_players_frame, "Green": green_players_frame}
     print(">>> Launching UDP server thread now (before countdown)")
@@ -121,34 +118,24 @@ def start_game(root, players=None):
                 print(f"Timer update: {mins:02d}:{secs:02d}")
             root.after(1000, update_timer, seconds - 1, is_game_timer)
         else:
-            if not is_game_timer:
-                timer_label.config(text="Game Started!")
-                print("Countdown finished — starting game.")
+            timer_label.config(text="Game Over")
+            print("Game Over")
 
-                # Send '202' to traffic generator
-                signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                signal_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                signal_sock.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
-                print("Sent '202' to traffic generator")
+    def start_game_logic():
+        # Send '202' to traffic generator
+        signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        signal_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        signal_sock.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
+        print("Sent '202' to traffic generator")
 
-                # Start actual 6-minute game timer
-                threading.Thread(target=play_random_music, daemon=True).start()
-                update_timer(360, is_game_timer=True)
-            else:
-                timer_label.config(text="Game Over")
-                print("Game Over")
+        # Start music
+        threading.Thread(target=play_random_music, daemon=True).start()
 
-    signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    signal_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    signal_sock.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
-    print("Sent '202' to traffic generator")
-    
-    # Start music
-    threading.Thread(target=play_random_music, daemon=True).start()
-    
-    # Start 6-minute game timer
-    update_timer(360, is_game_timer=True)
-    
+        # Start 6-minute game timer
+        update_timer(360, is_game_timer=True)
+
+    # Slight delay to ensure UI + UDP are fully up before starting
+    root.after(1000, start_game_logic)
 
 def handle_score_event(player_id, team, score_label, players_frame):
     if player_id not in player_scores:
@@ -176,6 +163,7 @@ if __name__ == "__main__":
     root.geometry("800x600")
     start_game(root)
     root.mainloop()
+
 
 
 
