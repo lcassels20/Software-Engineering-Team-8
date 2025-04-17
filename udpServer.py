@@ -1,7 +1,7 @@
 import socket
 import config
 
-def run_server(score_labels=None, player_frames=None):
+def run_server(score_labels=None, player_frames=None, log_event=None):
     from playerAction import handle_score_event, player_scores
 
     print(">>> run_server() called")
@@ -30,39 +30,38 @@ def run_server(score_labels=None, player_frames=None):
                 target_id = int(target_str)
 
                 if target_id == 43 and player_scores[shooter_id]["team"] == "Red":
-                    print(f"Red player {shooter_id} scored on Green base!")
                     handle_score_event(shooter_id, "Red", score_labels["Red"], player_frames["Red"])
+                    if log_event:
+                        log_event(f"Red base hit by player {shooter_id}")
                     UDPServerSocket.sendto(b"43", address)
                     continue
                 elif target_id == 53 and player_scores[shooter_id]["team"] == "Green":
-                    print(f"Green player {shooter_id} scored on Red base!")
                     handle_score_event(shooter_id, "Green", score_labels["Green"], player_frames["Green"])
+                    if log_event:
+                        log_event(f"Green base hit by player {shooter_id}")
                     UDPServerSocket.sendto(b"53", address)
                     continue
-                print(f"Parsed shooter_id: {shooter_id}, target_id: {target_id}")
+
+                if shooter_id in player_scores:
+                    team = player_scores[shooter_id]["team"]
+                    handle_score_event(shooter_id, team, score_labels[team], player_frames[team])
+                    if log_event:
+                        log_event(f"Player {shooter_id} hit Player {target_id} ({team} team)")
+                    UDPServerSocket.sendto(str(target_id).encode(), address)
+                else:
+                    UDPServerSocket.sendto(b"UNKNOWN SHOOTER", address)
             except ValueError:
-                print("Invalid IDs in message:", message)
                 UDPServerSocket.sendto(b"INVALID", address)
-                continue
-
-            if shooter_id in player_scores:
-                team = player_scores[shooter_id]["team"]
-                print(f"Handling event: {shooter_id} hit {target_id} (team: {team})")
-                handle_score_event(shooter_id, team, score_labels[team], player_frames[team])
-                UDPServerSocket.sendto(str(target_id).encode(), address)
-            else:
-                print(f"Shooter ID {shooter_id} not found.")
-                UDPServerSocket.sendto(b"UNKNOWN SHOOTER", address)
-
         elif message.strip() == "221":
-            print("Game over signal received. Sending '221'")
+            if log_event:
+                log_event("Game over signal received.")
             UDPServerSocket.sendto(b"221", address)
         else:
-            print(f"Message '{message.strip()}' not understood. Sending 'OK'")
             UDPServerSocket.sendto(b"OK", address)
 
 if __name__ == "__main__":
     run_server()
+
 
 
 
