@@ -106,14 +106,16 @@ def start_game(root, players=None):
     end_button = tk.Button(bottom_frame, text="End Game", font=("Arial", 14), bg="#AB7E02", fg="white", command=end_game)
     end_button.grid(row=0, column=0, padx=20, pady=10)
 
-    log_text = tk.Text(bottom_frame, height=4, width=60, font=("Arial", 10), bg="#FFFFE0")
+    log_text = tk.Text(bottom_frame, height=4, width=60, font=("Arial", 10), bg="#FFFFE0", state="disabled")
     log_text.grid(row=0, column=1, padx=10, sticky="ew")
 
     timer_label = tk.Label(bottom_frame, text="", font=("Arial", 24), fg="black", bg="#AB7E02")
     timer_label.grid(row=1, column=1, pady=5)
 
     def log_event(text):
+        log_text.config(state="normal")
         log_text.insert("end", text + "\n")
+        log_text.config(state="disabled")
         log_text.see("end")
 
     score_labels = {"Red": red_score_label, "Green": green_score_label}
@@ -172,6 +174,7 @@ if __name__ == "__main__":
     root.geometry("800x600")
     start_game(root)
     root.mainloop()
+
 
 
 
