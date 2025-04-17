@@ -113,31 +113,36 @@ def start_game(root, players=None):
     timer_label = tk.Label(bottom_frame, text="", font=("Arial", 24), fg="black", bg="#AB7E02")
     timer_label.pack(pady=10)
 
-    def update_timer(seconds):
-        if seconds > 0:
-            mins, secs = divmod(seconds, 60)
-            timer_label.config(text=f"{mins:02d}:{secs:02d}")
-            if seconds % 10 == 0:
-                print(f"Timer update: {mins:02d}:{secs:02d}")
-            root.after(1000, update_timer, seconds - 1)
+    def update_timer(seconds, is_game_timer=False):
+    if seconds > 0:
+        mins, secs = divmod(seconds, 60)
+        timer_label.config(text=f"{mins:02d}:{secs:02d}")
+        if seconds % 10 == 0:
+            print(f"Timer update: {mins:02d}:{secs:02d}")
+        root.after(1000, update_timer, seconds - 1, is_game_timer)
+    else:
+        if not is_game_timer:
+            timer_label.config(text="Game Started!")
+            print("Countdown finished — starting game.")
+
+            # Send '202' to traffic generator
+            signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            signal_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            signal_sock.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
+            print("✅ Sent '202' to traffic generator")
+
+            # Start background server and music
+            score_labels = {"Red": red_score_label, "Green": green_score_label}
+            player_frames = {"Red": red_players_frame, "Green": green_players_frame}
+            threading.Thread(target=udpServer.run_server, args=(score_labels, player_frames), daemon=True).start()
+            threading.Thread(target=play_random_music, daemon=True).start()
+
+            # 🔁 Start actual 6-minute game timer
+            update_timer(360, is_game_timer=True)
         else:
             timer_label.config(text="Game Over")
             print("Game Over")
 
-    # Send '202' to traffic generator immediately
-    signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    signal_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    print("Sending game start signal '202' to traffic generator...")
-    signal_sock.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
-    print("Sent '202' to traffic generator")
-
-    update_timer(360)  # Start 6-minute game timer immediately
-
-    # Start background server and music
-    score_labels = {"Red": red_score_label, "Green": green_score_label}
-    player_frames = {"Red": red_players_frame, "Green": green_players_frame}
-    threading.Thread(target=udpServer.run_server, args=(score_labels, player_frames), daemon=True).start()
-    threading.Thread(target=play_random_music, daemon=True).start()
 
 def handle_score_event(player_id, team, score_label, players_frame):
     if player_id not in player_scores:
