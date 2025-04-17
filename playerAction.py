@@ -4,7 +4,6 @@ import socket
 import config
 import threading
 import udpServer
-from randomMusic import play as play_random_music
 
 player_scores = {}
 
@@ -114,7 +113,6 @@ def start_game(root, players=None):
     player_frames = {"Red": red_players_frame, "Green": green_players_frame}
 
     threading.Thread(target=udpServer.run_server, args=(score_labels, player_frames), daemon=True).start()
-    threading.Thread(target=play_random_music, daemon=True).start()
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -163,6 +161,7 @@ if __name__ == "__main__":
     root.geometry("800x600")
     start_game(root)
     root.mainloop()
+
 
 
 
