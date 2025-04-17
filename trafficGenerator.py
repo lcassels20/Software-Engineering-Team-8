@@ -9,8 +9,8 @@ def get_network_address():
 
 bufferSize  = 1024
 network_address = get_network_address()
-serverAddressPort   = (network_address, 7500)
-clientAddressPort   = (network_address, 7501)
+serverAddressPort   = (network_address, 7501)
+clientAddressPort   = (network_address, 7500)
 
 
 print('this program will generate some test traffic for 2 players on the red ')
