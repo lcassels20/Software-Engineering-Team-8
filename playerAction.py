@@ -82,9 +82,6 @@ def start_game(root, players=None):
     else:
         tk.Label(red_players_frame, text="No players found", bg="#592020", fg="#FFFF33", font=("Arial", 12)).pack(pady=10)
 
-    tk.Label(red_frame, text="Latest Action:", bg="#592020", fg="#FFFF33", font=("Arial", 14, "bold")).pack(pady=(10,0))
-    red_latest_action = tk.Label(red_frame, text="", bg="#592020", fg="#FFFF33", font=("Arial", 12))
-    red_latest_action.pack(pady=(0,10))
 
     green_score_label = tk.Label(green_frame, text="Score: 0", bg="#20592e", fg="#FFFF33", font=("Arial", 16))
     green_score_label.pack(pady=5)
@@ -104,9 +101,6 @@ def start_game(root, players=None):
     else:
         tk.Label(green_players_frame, text="No players found", bg="#20592e", fg="#FFFF33", font=("Arial", 12)).pack(pady=10)
 
-    tk.Label(green_frame, text="Latest Action:", bg="#20592e", fg="#FFFF33", font=("Arial", 14, "bold")).pack(pady=(10,0))
-    green_latest_action = tk.Label(green_frame, text="", bg="#20592e", fg="#FFFF33", font=("Arial", 12))
-    green_latest_action.pack(pady=(0,10))
 
     bottom_frame = tk.Frame(root, bg="#AB7E02")
     bottom_frame.grid(row=1, column=0, columnspan=2, sticky="ew")
