@@ -138,16 +138,16 @@ def start_game(root, players=None):
                 timer_label.config(text="Game Over")
                 print("Game Over")
 
-        signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        signal_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        signal_sock.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
-        print("Sent '202' to traffic generator")
-        
-        # Start music
-        threading.Thread(target=play_random_music, daemon=True).start()
-        
-        # Start 6-minute game timer
-        update_timer(360, is_game_timer=True)
+    signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    signal_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    signal_sock.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
+    print("Sent '202' to traffic generator")
+    
+    # Start music
+    threading.Thread(target=play_random_music, daemon=True).start()
+    
+    # Start 6-minute game timer
+    update_timer(360, is_game_timer=True)
     
 
 def handle_score_event(player_id, team, score_label, players_frame):
