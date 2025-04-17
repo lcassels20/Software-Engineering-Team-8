@@ -2,6 +2,8 @@ import socket
 import random
 import time
 
+#Same as Professor's file provided, with added option to choose 
+#a new network address other than the default
 def get_network_address():
 	print("Select network address (default is 127.0.0.1)")
 	new_address = input("Enter new network address or press enter for default:")
