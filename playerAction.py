@@ -142,10 +142,7 @@ def start_game(root, players=None):
             else:
                 timer_label.config(text="Game Over")
                 print("Game Over")
-        update_timer(30)
-
-
-
+update_timer(30)
 def handle_score_event(player_id, team, score_label, players_frame):
     if player_id not in player_scores:
         print(f"Player ID {player_id} not found.")
