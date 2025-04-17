@@ -39,9 +39,12 @@ This guide will walk you through installing the necessary software, configuring 
     sudo apt-get install python3-pip
     ```
 5. **Install Python Dependencies**
-   **(Install pg8000)**:
+   **(Install pg8000 and pygame)**:
    ```sh
    pip3 install pg8000
+   ```
+   ```sh
+   pip install pygame
    ```
    **(Install Pillow)**:
    ```sh
@@ -65,7 +68,15 @@ This guide will walk you through installing the necessary software, configuring 
    ```sh
    \q
    ```
-8. **Run the Code**
+8. **Create a new terminal instance, then change into the directory**
+   ```sh
+   cd Software-Engineering-Team-8
+   ```
+   ```sh
+   cd trafficGenerator
+   ```
+9. **Run this first typing in expected codes, then run the game in the other terminal**
+10. **Run the Code**
    **(First run database.py before running the main file to clear the table)**
    ```sh
    python3 database.py
@@ -77,7 +88,7 @@ This guide will walk you through installing the necessary software, configuring 
 
    ## Game Instructions
    **Play the Game**: Click the play button.
-   **Add a Player**: Click Add Player on the respective team.
+   **Add a Player**: Click Add Player on the respective team. Type in identical codes for all players, then start game.
    **Submit Players**: After entering players, click Submit Players for each team to send it to the player action.
    **Start Game**: Click Start Game to begin playing.
    **Other Options**:
