@@ -246,7 +246,7 @@ def countdown_screen(callback):
     
     def update_count(i):
         if i == 9:
-            threading.Thread(target=play_random_music, daemon=True).start(
+            threading.Thread(target=play_random_music, daemon=True).start()
         if i > 0:
             countdown_label.config(text=str(i))
             countdown_frame.after(1000, update_count, i-1)
