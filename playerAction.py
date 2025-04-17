@@ -4,7 +4,6 @@ import socket
 import config
 import threading
 import udpServer
-#from randomMusic import play as play_random_music
 
 player_scores = {}
 
@@ -98,6 +97,7 @@ def start_game(root, players=None):
     bottom_frame.grid(row=1, column=0, columnspan=2, sticky="ew")
     bottom_frame.grid_columnconfigure(0, weight=1)
     bottom_frame.grid_columnconfigure(1, weight=1)
+    bottom_frame.grid_columnconfigure(2, weight=1)
 
     # End Game button
     def end_game():
@@ -110,17 +110,18 @@ def start_game(root, players=None):
     end_button = tk.Button(bottom_frame, text="End Game", font=("Arial", 14), bg="#AB7E02", fg="white", command=end_game)
     end_button.grid(row=0, column=0, padx=20, pady=10)
 
+    # Event label
+    event_label = tk.Label(bottom_frame, text="Recent Event", font=("Arial", 14), fg="black", bg="#AB7E02")
+    event_label.grid(row=0, column=1, padx=10, pady=10)
+
     # Timer label
     timer_label = tk.Label(bottom_frame, text="", font=("Arial", 24), fg="black", bg="#AB7E02")
-    timer_label.grid(row=0, column=1, pady=10)
+    timer_label.grid(row=0, column=2, pady=10)
 
     # Start UDP server
     score_labels = {"Red": red_score_label, "Green": green_score_label}
     player_frames = {"Red": red_players_frame, "Green": green_players_frame}
-    threading.Thread(target=udpServer.run_server, args=(score_labels, player_frames), daemon=True).start()
-
-    # Start music
-    #threading.Thread(target=play_random_music, daemon=True).start()
+    threading.Thread(target=udpServer.run_server, args=(score_labels, player_frames, event_label), daemon=True).start()
 
     # Send 202 to traffic generator
     signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -143,7 +144,7 @@ def start_game(root, players=None):
 
     update_timer(360)
 
-def handle_score_event(player_id, team, score_label, players_frame):
+def handle_score_event(player_id, team, score_label, players_frame, event_label=None):
     if player_id not in player_scores:
         print(f"Player ID {player_id} not found.")
         return
@@ -163,12 +164,17 @@ def handle_score_event(player_id, team, score_label, players_frame):
             label = tk.Label(players_frame, text=text, bg=players_frame["bg"], fg="#FFFF33", font=("Arial", 12))
             label.pack(anchor="w", pady=2)
 
+    if event_label:
+        codename = player_scores[player_id]["codename"]
+        event_label.config(text=f"{codename} scored!")
+
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("Player Actions")
     root.geometry("800x600")
     start_game(root)
     root.mainloop()
+
 
 
 
