@@ -126,6 +126,8 @@ def start_game(root, players=None):
 
     # Send '202' to traffic generator immediately
     signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    signal_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    print("Sending game start signal '202' to traffic generator...")
     signal_sock.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
     print("Sent '202' to traffic generator")
 
