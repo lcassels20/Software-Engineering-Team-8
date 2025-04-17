@@ -42,9 +42,6 @@ def start_game(root, players=None):
     if players is None:
         players = fetch_players()
 
-    # -----------------------------------------------------------------------
-    #  BUILD THE GAME LAYOUT
-    # -----------------------------------------------------------------------
     player_scores = {int(p[2]): {"codename": p[1], "score": 0, "team": p[3]}
                      for p in players if str(p[2]).isdigit()}
 
@@ -100,7 +97,7 @@ def start_game(root, players=None):
               bg="#AB7E02", fg="white", command=end_game
               ).grid(row=0, column=0, padx=20, pady=10)
 
-    # ---------- LOG AREA (read‑only) --------------------------------------
+    # ---------- LOG AREA ---------------------------------------------------
     log_box = tk.Text(bottom, height=4, bg="#FFFFE0",
                       font=("Arial", 10), state="disabled", wrap="none")
     log_box.grid(row=0, column=1, sticky="ew", padx=10)
@@ -110,8 +107,7 @@ def start_game(root, players=None):
     timer_lbl.grid(row=1, column=1, pady=5)
 
     # -----------------------------------------------------------------------
-    #  THREAD‑SAFE LOGGING
-    # -----------------------------------------------------------------------
+    # thread‑safe logging via queue
     log_q = queue.Queue()
 
     def add_to_log(msg):
@@ -123,11 +119,10 @@ def start_game(root, players=None):
     def poll_log_queue():
         while not log_q.empty():
             add_to_log(log_q.get())
-        root.after(100, poll_log_queue)   # keep polling
+        root.after(100, poll_log_queue)
 
-    poll_log_queue()  # start the polling loop
+    poll_log_queue()
 
-    # this function is passed to the UDP thread -----------------------------
     def log_event(msg):
         log_q.put(msg)
 
@@ -139,7 +134,7 @@ def start_game(root, players=None):
                      args=(score_labels, player_frames, log_event),
                      daemon=True).start()
 
-    # kick the traffic generator
+    # kick traffic generator
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
@@ -164,16 +159,18 @@ def handle_score_event(player_id, team, score_lbl, players_fr):
     if not p["codename"].startswith("B "):
         p["codename"] = "B " + p["codename"]
 
-    score_lbl.config(text=f"Score: {sum(
-        pp['score'] for pp in player_scores.values() if pp['team']==team)}")
+    team_score = sum(pp["score"] for pp in player_scores.values()
+                     if pp["team"] == team)
+    score_lbl.config(text=f"Score: {team_score}")
 
-    for w in players_fr.winfo_children(): w.destroy()
+    for w in players_fr.winfo_children():
+        w.destroy()
     for pid, pdata in sorted(player_scores.items(),
                              key=lambda x: -x[1]["score"]):
         if pdata["team"] == team:
             tk.Label(players_fr,
-                     text=f"ID: {pid} | Name: {pdata['codename']} | "
-                          f"Score: {pdata['score']}",
+                     text=(f"ID: {pid} | Name: {pdata['codename']} | "
+                           f"Score: {pdata['score']}"),
                      bg=players_fr["bg"], fg="#FFFF33",
                      font=("Arial", 12)
                      ).pack(anchor="w", pady=2)
@@ -185,6 +182,7 @@ if __name__ == "__main__":
     root.geometry("800x600")
     start_game(root)
     root.mainloop()
+
 
 
 
