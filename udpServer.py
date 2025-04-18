@@ -1,9 +1,10 @@
 import socket
 import config
 from logger import log_event
-from playerAction import handle_score_event, player_scores
+#from playerAction import handle_score_event, player_scores
 
 def run_server(score_labels=None, player_frames=None):
+    from playerAction import handle_score_event, player_scores
     print(">>> run_server() called")
     log_event(">>> UDP Server Started")
 
