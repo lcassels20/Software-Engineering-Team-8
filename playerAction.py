@@ -5,7 +5,7 @@ import config
 import threading
 import udpServer
 import time
-#from randomMusic import play as play_random_music
+from log import log_event, log_queue
 
 player_scores = {}
 
@@ -33,6 +33,7 @@ def create_scrollable_frame(parent, height):
 
 def start_game(root, players=None):
     global player_scores
+    timer_job = None
 
     for widget in root.winfo_children():
         widget.destroy()
@@ -74,11 +75,10 @@ def start_game(root, players=None):
     red_title.pack(pady=10)
 
     red_players_frame = create_scrollable_frame(red_frame, height=250)
-    if red_team:
-        for player in red_team:
-            text = f"ID: {player[0]} | Name: {player[1]} | Equipment: {player[2]}"
-            label = tk.Label(red_players_frame, text=text, bg="#592020", fg="#FFFF33", font=("Arial", 12))
-            label.pack(anchor="w", pady=2)
+    for player in red_team:
+        text = f"ID: {player[0]} | Name: {player[1]} | Equipment: {player[2]}"
+        label = tk.Label(red_players_frame, text=text, bg="#592020", fg="#FFFF33", font=("Arial", 12))
+        label.pack(anchor="w", pady=2)
 
     green_score_label = tk.Label(green_frame, text="Score: 0", bg="#20592e", fg="#FFFF33", font=("Arial", 16))
     green_score_label.pack(pady=5)
@@ -89,19 +89,37 @@ def start_game(root, players=None):
     green_title.pack(pady=10)
 
     green_players_frame = create_scrollable_frame(green_frame, height=250)
-    if green_team:
-        for player in green_team:
-            text = f"ID: {player[0]} | Name: {player[1]} | Equipment: {player[2]}"
-            label = tk.Label(green_players_frame, text=text, bg="#20592e", fg="#FFFF33", font=("Arial", 12))
-            label.pack(anchor="w", pady=2)
+    for player in green_team:
+        text = f"ID: {player[0]} | Name: {player[1]} | Equipment: {player[2]}"
+        label = tk.Label(green_players_frame, text=text, bg="#20592e", fg="#FFFF33", font=("Arial", 12))
+        label.pack(anchor="w", pady=2)
 
     bottom_frame = tk.Frame(root, bg="#AB7E02")
     bottom_frame.grid(row=1, column=0, columnspan=2, sticky="ew")
     bottom_frame.grid_columnconfigure(0, weight=1)
     bottom_frame.grid_columnconfigure(1, weight=1)
 
-    # End Game button
+    # Log window
+    event_log = tk.Text(bottom_frame, height=5, state="disabled", bg="#8b0000", fg="lightgreen", font=("Courier", 10))
+    event_log.grid(row=1, column=0, columnspan=2, padx=10, pady=(0, 10), sticky="ew")
+
+    def process_log_queue():
+        try:
+            while True:
+                msg = log_queue.get_nowait()
+                event_log.config(state="normal")
+                event_log.insert("end", f"{msg}\n")
+                event_log.see("end")
+                event_log.config(state="disabled")
+        except queue.Empty:
+            pass
+        root.after(500, process_log_queue)
+
+    # End game
     def end_game():
+        nonlocal timer_job
+        if timer_job:
+            root.after_cancel(timer_job)
         for _ in range(3):
             signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             signal_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -111,44 +129,37 @@ def start_game(root, players=None):
     end_button = tk.Button(bottom_frame, text="End Game", font=("Arial", 14), bg="#AB7E02", fg="white", command=end_game)
     end_button.grid(row=0, column=0, padx=20, pady=10)
 
-    # Timer label
     timer_label = tk.Label(bottom_frame, text="", font=("Arial", 24), fg="black", bg="#AB7E02")
     timer_label.grid(row=0, column=1, pady=10)
 
-    # Start UDP server
     score_labels = {"Red": red_score_label, "Green": green_score_label}
     player_frames = {"Red": red_players_frame, "Green": green_players_frame}
     threading.Thread(target=udpServer.run_server, args=(score_labels, player_frames), daemon=True).start()
+    time.sleep(1)
 
-    # Start music
-    threading.Thread(target=udpServer.run_server, args=(score_labels, player_frames), daemon=True).start()
-    time.sleep(1)  # gives server time to initialize socket before traffic starts
-
-
-    # Send 202 to traffic generator
     signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     signal_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     signal_sock.sendto(b"202", (config.NETWORK_ADDRESS, 7500))
     print("Sent '202' to traffic generator")
 
     def update_timer(seconds):
+        nonlocal timer_job
         if seconds > 0:
             mins, secs = divmod(seconds, 60)
             timer_label.config(text=f"{mins:02d}:{secs:02d}")
-            root.after(1000, update_timer, seconds - 1)
+            timer_job = root.after(1000, update_timer, seconds - 1)
         else:
             timer_label.config(text="Game Over")
             print("Game Over")
             for _ in range(3):
-                signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                signal_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 signal_sock.sendto(b"221", (config.NETWORK_ADDRESS, 7500))
 
     update_timer(360)
+    process_log_queue()
 
 def handle_score_event(player_id, team, score_label, players_frame):
     if player_id not in player_scores:
-        print(f"Player ID {player_id} not found.")
+        log_event(f"⚠ Player ID {player_id} not found.")
         return
 
     player_scores[player_id]["score"] += 100
@@ -166,12 +177,6 @@ def handle_score_event(player_id, team, score_label, players_frame):
             label = tk.Label(players_frame, text=text, bg=players_frame["bg"], fg="#FFFF33", font=("Arial", 12))
             label.pack(anchor="w", pady=2)
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    root.title("Player Actions")
-    root.geometry("800x600")
-    start_game(root)
-    root.mainloop()
 
 
 
