@@ -54,6 +54,7 @@ def run_server(score_labels=None, player_frames=None):
                     player_frames[team]
                 )
 
+                # Send back the equipment ID of the player who got hit
                 print(f"Sending hit acknowledgment: {target_id}")
                 UDPServerSocket.sendto(str(target_id).encode(), address)
             else:
@@ -69,6 +70,19 @@ def run_server(score_labels=None, player_frames=None):
 
 if __name__ == "__main__":
     run_server()
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
