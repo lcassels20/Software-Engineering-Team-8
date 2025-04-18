@@ -1,10 +1,10 @@
 import socket
 import config
 from logger import log_event
-#from playerAction import handle_score_event, player_scores
 
 def run_server(score_labels=None, player_frames=None):
     from playerAction import handle_score_event, player_scores
+
     print(">>> run_server() called")
     log_event(">>> UDP Server Started")
 
@@ -15,7 +15,6 @@ def run_server(score_labels=None, player_frames=None):
     UDPServerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     UDPServerSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     UDPServerSocket.bind((localIP, localPort))
-    print("UDP server up and listening on", localIP, ":", localPort)
     log_event(f"UDP server listening on {localIP}:{localPort}")
 
     while True:
@@ -23,8 +22,7 @@ def run_server(score_labels=None, player_frames=None):
         message = bytesAddressPair[0].decode()
         address = bytesAddressPair[1]
 
-        print("\nUDP Server received message:", message)
-        print("Current player_scores keys:", list(player_scores.keys()))
+        log_event(f"📩 Received: {message}")
 
         if ":" in message and score_labels and player_frames:
             try:
@@ -68,6 +66,7 @@ def run_server(score_labels=None, player_frames=None):
 
 if __name__ == "__main__":
     run_server()
+
 
 
 
