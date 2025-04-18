@@ -5,6 +5,13 @@ import config
 import threading
 import udpServer
 #from randomMusic import play as play_random_music
+def log_event(message):
+    global event_log
+    if event_log:
+        event_log.config(state="normal")
+        event_log.insert("end", message + "\n")
+        event_log.see("end")
+        event_log.config(state="disabled")
 
 player_scores = {}
 
@@ -113,6 +120,12 @@ def start_game(root, players=None):
     # Timer label
     timer_label = tk.Label(bottom_frame, text="", font=("Arial", 24), fg="black", bg="#AB7E02")
     timer_label.grid(row=0, column=1, pady=10)
+    # Event Log widget (red background, green text)
+    global event_log
+    event_log = tk.Text(bottom_frame, height=4, bg="red", fg="green", font=("Arial", 10))
+    event_log.grid(row=1, column=0, columnspan=2, padx=20, pady=(0, 10))
+    event_log.insert("end", "Event Log Ready...\n")
+    event_log.config(state="disabled")
 
     # Start UDP server
     score_labels = {"Red": red_score_label, "Green": green_score_label}
