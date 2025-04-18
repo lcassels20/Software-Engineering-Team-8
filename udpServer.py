@@ -4,6 +4,7 @@ from logger import log_event
 
 def run_server(score_labels=None, player_frames=None):
     import time
+    from playerAction import handle_score_event, player_scores
     time.sleep(2)  # ⏸ wait for player_scores to fill
     log_event(f"run_server started with player_scores: {list(player_scores.keys())}")
 
