@@ -4,6 +4,7 @@ import socket
 import config
 import threading
 import udpServer
+import queue
 from logger import log_event, log_queue
 
 player_scores = {}
