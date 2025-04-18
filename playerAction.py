@@ -101,7 +101,7 @@ def start_game(root, players=None):
     bottom_frame.grid_columnconfigure(1, weight=1)
 
     # Log window
-    event_log = tk.Text(bottom_frame, height=5, state="disabled", bg="#8b0000", fg="lightgreen", font=("Courier", 10))
+    event_log = tk.Text(bottom_frame, height=5, state="disabled", bg="#AB7E02", fg="white", font=("Arial", 14))
     event_log.grid(row=1, column=0, columnspan=2, padx=10, pady=(0, 10), sticky="ew")
 
     def process_log_queue():
