@@ -4,11 +4,8 @@ import socket
 import config
 import threading
 import udpServer
-import queue
-from logger import log_event, log_queue
 
 player_scores = {}
-event_log = None
 
 def fetch_players():
     conn = get_connection()
@@ -32,21 +29,8 @@ def create_scrollable_frame(parent, height):
     scrollbar.pack(side="right", fill="y")
     return scroll_frame
 
-def process_log_queue():
-    global event_log
-    try:
-        while True:
-            msg = log_queue.get_nowait()
-            event_log.config(state="normal")
-            event_log.insert("end", msg + "\n")
-            event_log.see("end")
-            event_log.config(state="disabled")
-    except queue.Empty:
-        pass
-    event_log.after(100, process_log_queue)
-
 def start_game(root, players=None):
-    global player_scores, event_log
+    global player_scores
 
     for widget in root.winfo_children():
         widget.destroy()
@@ -114,14 +98,6 @@ def start_game(root, players=None):
     bottom_frame.grid_columnconfigure(0, weight=1)
     bottom_frame.grid_columnconfigure(1, weight=1)
 
-    timer_label = tk.Label(bottom_frame, text="", font=("Arial", 24), fg="black", bg="#AB7E02")
-    timer_label.grid(row=0, column=1, pady=10, sticky="e")
-
-    event_log = tk.Text(bottom_frame, height=4, bg="red", fg="green", font=("Arial", 10))
-    event_log.grid(row=1, column=0, columnspan=2, padx=20, pady=(0, 10))
-    event_log.insert("end", "Event Log Ready...\n")
-    event_log.config(state="disabled")
-
     def end_game():
         for _ in range(3):
             signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -132,9 +108,14 @@ def start_game(root, players=None):
     end_button = tk.Button(bottom_frame, text="End Game", font=("Arial", 14), bg="#AB7E02", fg="white", command=end_game)
     end_button.grid(row=0, column=0, padx=20, pady=10)
 
+    timer_label = tk.Label(bottom_frame, text="", font=("Arial", 24), fg="black", bg="#AB7E02")
+    timer_label.grid(row=0, column=1, pady=10)
+
     score_labels = {"Red": red_score_label, "Green": green_score_label}
     player_frames = {"Red": red_players_frame, "Green": green_players_frame}
     threading.Thread(target=udpServer.run_server, args=(score_labels, player_frames), daemon=True).start()
+
+    # Music thread removed
 
     signal_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     signal_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -155,7 +136,6 @@ def start_game(root, players=None):
                 signal_sock.sendto(b"221", (config.NETWORK_ADDRESS, 7500))
 
     update_timer(360)
-    process_log_queue()
 
 def handle_score_event(player_id, team, score_label, players_frame):
     if player_id not in player_scores:
@@ -183,6 +163,7 @@ if __name__ == "__main__":
     root.geometry("800x600")
     start_game(root)
     root.mainloop()
+
 
 
 
