@@ -68,16 +68,16 @@ This guide will walk you through installing the necessary software, configuring 
    ```sh
    \q
    ```
-8. **Create a new terminal instance, then change into the directory**
+8. **Create a new terminal instance, then change into the directory in which the files are in**
    ```sh
    cd Software-Engineering-Team-8
    ```
    ```sh
-   cd trafficGenerator
+   python3 trafficGenerator.py
    ```
-9. **Run this first typing in expected codes in trafficGenerator, then run the game in the other terminal**
-10. **Run the Code**
-   **(First run database.py before running the main file to clear the table)**
+9. **Enter the ID for the equipment first and allow the generator to idly wait for the start code. then run the game in the other terminal**
+10. **python3 main.py**
+   **(IF databse is not cleared, first run database.py before running the main file to clear the table)**
    ```sh
    python3 database.py
    ```
@@ -88,14 +88,14 @@ This guide will walk you through installing the necessary software, configuring 
 
    ## Game Instructions
    **Play the Game**: Click the play button.
-   **Add a Player**: Click Add Player on the respective team. Type in identical codes for all players, then start game.
-   **Submit Players**: After entering players, click Submit Players for each team to send it to the player action.
+   **Add Players based on the four equipment ids in the traffic generator**: Click Add Player on the respective team. Type in identical codes for all players, then start game.
+   **Submit Players**: After entering players on both teams, click Submit Players for each team to send it to the player action.
    **Start Game**: Click Start Game to begin playing.
    **Other Options**:
        Users can change the network or clear teams if needed.
        Press Esc on your keyboard to exit full-screen mode.
        Click the X in the popup window to end the game.
-       Debugging: the terminal will display all UDP transmission handling.
+       Debugging: the terminal will display all UDP transmission handling execpt the communication is not being sent back to the conosle running main.
 
 
 
